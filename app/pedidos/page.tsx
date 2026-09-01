@@ -19,17 +19,19 @@ export default async function PedidosPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold">Pedidos</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-3xl font-extrabold">📋 Pedidos</h1>
+        <p className="mt-1 text-sm text-ink-soft">
           Registra lo que compraste (en La Comer o en tienda) para reponer el inventario
           automáticamente. El formulario ya viene precargado con tu último pedido.
         </p>
       </div>
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-5">
-        <h2 className="font-medium">Registrar pedido</h2>
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-mint-text">
+          <span>✍️</span> Registrar pedido
+        </h2>
         {products.length === 0 ? (
-          <p className="mt-3 text-sm text-zinc-400">
+          <p className="mt-3 text-sm text-ink-soft">
             Primero agrega productos en Inventario para poder registrarlos aquí.
           </p>
         ) : (
@@ -41,8 +43,10 @@ export default async function PedidosPage() {
 
       {pendingOrErrorLogs.length > 0 && (
         <section>
-          <h2 className="mb-3 font-medium">Robot de compra — en curso / con errores</h2>
-          <p className="mb-3 text-sm text-zinc-500">
+          <h2 className="mb-3 flex items-center gap-2 font-bold text-ink">
+            <span>🤖</span> Robot de compra — en curso / con errores
+          </h2>
+          <p className="mb-3 text-sm text-ink-soft">
             Cuando el pedido se dispara desde el sitio en producción, corre en GitHub Actions y
             puede tardar unos minutos en aparecer arriba en Pedidos. Aquí ves el estado mientras
             tanto, o si algo falló.
@@ -51,16 +55,12 @@ export default async function PedidosPage() {
             {pendingOrErrorLogs.map((log) => (
               <div
                 key={log.id}
-                className={`rounded-lg border p-3 text-sm ${
-                  log.status === "error"
-                    ? "border-red-200 bg-red-50 text-red-800"
-                    : "border-amber-200 bg-amber-50 text-amber-800"
+                className={`card !p-3 text-sm ${
+                  log.status === "error" ? "border-berry/30 bg-berry-light/50 text-berry-text" : "border-sun/30 bg-sun-light/50 text-sun-text"
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">
-                    {log.status === "error" ? "Error" : "En proceso"}
-                  </span>
+                  <span className="font-bold">{log.status === "error" ? "❌ Error" : "⏳ En proceso"}</span>
                   <span className="text-xs opacity-70">
                     {new Date(log.startedAt).toLocaleString("es-MX", {
                       dateStyle: "medium",
@@ -76,35 +76,34 @@ export default async function PedidosPage() {
       )}
 
       <section>
-        <h2 className="mb-3 font-medium">Historial</h2>
+        <h2 className="mb-3 flex items-center gap-2 font-bold text-brand-text">
+          <span>🕓</span> Historial
+        </h2>
         <div className="flex flex-col gap-3">
           {orders.map((order) => (
-            <div key={order.id} className="rounded-lg border border-zinc-200 bg-white p-4">
+            <div key={order.id} className="card !p-4">
               <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">
+                <span className="font-bold">
                   {new Date(order.placedAt).toLocaleString("es-MX", {
                     dateStyle: "medium",
                     timeStyle: "short",
                   })}
                 </span>
-                <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
-                  {order.source === "automatico" ? "Automático (La Comer)" : "Manual"} ·{" "}
-                  {order.status}
+                <span className={order.source === "automatico" ? "badge-mint" : "badge-brand"}>
+                  {order.source === "automatico" ? "🤖 Automático" : "✍️ Manual"} · {order.status}
                 </span>
               </div>
-              <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-zinc-600">
+              <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-soft">
                 {order.items.map((item) => (
                   <li key={item.id}>
                     {item.product.name} × {item.quantity} {item.product.unit}
                   </li>
                 ))}
               </ul>
-              {order.notes && <p className="mt-2 text-xs text-zinc-400">{order.notes}</p>}
+              {order.notes && <p className="mt-2 text-xs text-ink-soft">{order.notes}</p>}
             </div>
           ))}
-          {orders.length === 0 && (
-            <p className="text-sm text-zinc-400">Aún no hay pedidos registrados.</p>
-          )}
+          {orders.length === 0 && <p className="text-sm text-ink-soft">Aún no hay pedidos registrados.</p>}
         </div>
       </section>
     </div>

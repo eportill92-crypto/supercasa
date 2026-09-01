@@ -11,9 +11,9 @@ export default function AddMissingButton({ recipeId }: { recipeId: string }) {
       type="button"
       disabled={isPending}
       onClick={() => startTransition(() => addMissingIngredientsToShoppingList(recipeId))}
-      className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+      className="btn-secondary !px-3 !py-1.5 text-xs"
     >
-      {isPending ? "Agregando..." : "Agregar faltantes a la lista"}
+      {isPending ? "Agregando..." : "🛒 Agregar faltantes a la lista"}
     </button>
   );
 }

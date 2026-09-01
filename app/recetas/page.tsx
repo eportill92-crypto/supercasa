@@ -17,8 +17,8 @@ export default async function RecetasPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold">Recetas</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-3xl font-extrabold">🍳 Recetas</h1>
+        <p className="mt-1 text-sm text-ink-soft">
           Ordenadas para cocinar con lo que ya tienes: primero tus recetas y las que ya has
           preparado, luego las que más se acercan a tu inventario actual.
         </p>
@@ -28,42 +28,29 @@ export default async function RecetasPage() {
         {recipes.map((r) => {
           const complete = r.totalCount > 0 && r.haveCount === r.totalCount;
           return (
-            <div key={r.id} className="rounded-lg border border-zinc-200 bg-white p-4">
+            <div key={r.id} className="card !p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <span className="font-medium">{r.name}</span>
-                  {r.mealType && (
-                    <span className="ml-2 rounded-full bg-zinc-100 px-2 py-0.5 text-xs text-zinc-600">
-                      {MEAL_LABELS[r.mealType] ?? r.mealType}
-                    </span>
-                  )}
-                  {r.source === "user" && (
-                    <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">
-                      Tuya
-                    </span>
-                  )}
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold">{r.name}</span>
+                  {r.mealType && <span className="badge-grape">{MEAL_LABELS[r.mealType] ?? r.mealType}</span>}
+                  {r.source === "user" && <span className="badge-mint">Tuya</span>}
                   {r.timesUsedByMe > 0 && (
-                    <span className="ml-2 text-xs text-zinc-400">
+                    <span className="text-xs text-ink-soft">
                       La preparaste {r.timesUsedByMe} {r.timesUsedByMe === 1 ? "vez" : "veces"}
                     </span>
                   )}
                 </div>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                    complete ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-                  }`}
-                >
+                <span className={complete ? "badge-mint" : "badge-sun"}>
                   {r.haveCount}/{r.totalCount} ingredientes
                 </span>
               </div>
 
-              {r.instructions && <p className="mt-2 text-sm text-zinc-600">{r.instructions}</p>}
+              {r.instructions && <p className="mt-2 text-sm text-ink-soft">{r.instructions}</p>}
 
               {r.missing.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs text-zinc-400">
-                    Te falta:{" "}
-                    {r.missing.map((m) => `${m.name} (${m.needed} ${m.unit})`).join(", ")}
+                  <p className="text-xs text-ink-soft">
+                    Te falta: {r.missing.map((m) => `${m.name} (${m.needed} ${m.unit})`).join(", ")}
                   </p>
                   <div className="mt-2">
                     <AddMissingButton recipeId={r.id} />
@@ -74,7 +61,7 @@ export default async function RecetasPage() {
               {r.source === "user" && (
                 <form action={deleteRecipe} className="mt-2">
                   <input type="hidden" name="id" value={r.id} />
-                  <button type="submit" className="text-xs text-zinc-400 hover:text-red-600">
+                  <button type="submit" className="text-xs font-semibold text-ink-soft hover:text-berry-text">
                     Eliminar receta
                   </button>
                 </form>
@@ -82,13 +69,13 @@ export default async function RecetasPage() {
             </div>
           );
         })}
-        {recipes.length === 0 && (
-          <p className="text-sm text-zinc-400">Aún no hay recetas.</p>
-        )}
+        {recipes.length === 0 && <p className="text-sm text-ink-soft">Aún no hay recetas.</p>}
       </section>
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-5">
-        <h2 className="font-medium">Agregar tu propia receta</h2>
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-brand-text">
+          <span>👩‍🍳</span> Agregar tu propia receta
+        </h2>
         <div className="mt-4">
           <AddRecipeForm />
         </div>

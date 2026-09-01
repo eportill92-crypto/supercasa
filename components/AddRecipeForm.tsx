@@ -44,7 +44,7 @@ export default function AddRecipeForm() {
           instructions,
           ingredients: rows,
         });
-        setMessage("Receta guardada.");
+        setMessage("Receta guardada. 🎉");
         setName("");
         setInstructions("");
         setRows([{ productName: "", unit: "pza", quantity: 1 }]);
@@ -61,13 +61,9 @@ export default function AddRecipeForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Nombre de la receta"
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2"
+          className="input sm:col-span-2"
         />
-        <select
-          value={mealType}
-          onChange={(e) => setMealType(e.target.value)}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-        >
+        <select value={mealType} onChange={(e) => setMealType(e.target.value)} className="input">
           {MEAL_TYPES.map((m) => (
             <option key={m.value} value={m.value}>
               {m.label}
@@ -77,52 +73,44 @@ export default function AddRecipeForm() {
       </div>
 
       <div className="flex items-center gap-2">
-        <label className="text-sm text-zinc-500">Porciones</label>
+        <label className="text-sm font-semibold text-ink-soft">Porciones</label>
         <input
           type="number"
           value={servings}
           onChange={(e) => setServings(Number(e.target.value))}
-          className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-sm"
+          className="input w-20"
         />
       </div>
 
       <div className="flex flex-col gap-2">
-        <p className="text-sm font-medium text-zinc-700">Ingredientes (para esas porciones)</p>
+        <p className="text-sm font-bold text-ink">Ingredientes (para esas porciones)</p>
         {rows.map((row, index) => (
           <div key={index} className="flex items-center gap-2">
             <input
               value={row.productName}
               onChange={(e) => updateRow(index, { productName: e.target.value })}
               placeholder="Producto (ej. Jitomate)"
-              className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+              className="input flex-1"
             />
             <input
               type="number"
               step="0.05"
               value={row.quantity}
               onChange={(e) => updateRow(index, { quantity: Number(e.target.value) })}
-              className="w-20 rounded-md border border-zinc-300 px-2 py-2 text-sm"
+              className="input w-20"
             />
             <input
               value={row.unit}
               onChange={(e) => updateRow(index, { unit: e.target.value })}
               placeholder="unidad"
-              className="w-20 rounded-md border border-zinc-300 px-2 py-2 text-sm"
+              className="input w-20"
             />
-            <button
-              type="button"
-              onClick={() => removeRow(index)}
-              className="text-xs text-zinc-400 hover:text-red-600"
-            >
+            <button type="button" onClick={() => removeRow(index)} className="text-xs font-semibold text-ink-soft hover:text-berry-text">
               Quitar
             </button>
           </div>
         ))}
-        <button
-          type="button"
-          onClick={addRow}
-          className="self-start rounded-md px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100"
-        >
+        <button type="button" onClick={addRow} className="btn-ghost self-start !px-2">
           + Agregar ingrediente
         </button>
       </div>
@@ -132,19 +120,14 @@ export default function AddRecipeForm() {
         onChange={(e) => setInstructions(e.target.value)}
         placeholder="Instrucciones (opcional)"
         rows={3}
-        className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        className="input"
       />
 
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={submit}
-        className="self-start rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
-      >
+      <button type="button" disabled={isPending} onClick={submit} className="btn-primary self-start">
         {isPending ? "Guardando..." : "Guardar receta"}
       </button>
 
-      {message && <p className="text-sm text-emerald-600">{message}</p>}
+      {message && <p className="text-sm font-semibold text-mint-text">{message}</p>}
     </div>
   );
 }

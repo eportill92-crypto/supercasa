@@ -1,25 +1,94 @@
 @import "tailwindcss";
 
 /*
- * La app todavía no tiene un tema oscuro real (todos los componentes usan colores fijos tipo
- * bg-white/text-zinc-900 pensados para fondo claro). "color-scheme: light" le dice al navegador
- * que no la oscurezca solo por su cuenta (el "forzar oscuro" de Chrome en Android, o Safari) —
- * sin esto, en un teléfono con modo oscuro activado se veía pantalla negra con texto invisible,
- * porque el navegador reinterpretaba los colores fijos de la página.
+ * La app todavía no tiene un tema oscuro real (todos los componentes usan colores fijos
+ * pensados para fondo claro). "color-scheme: light" le dice al navegador que no la oscurezca
+ * solo por su cuenta (el "forzar oscuro" de Chrome en Android, o Safari) — sin esto, en un
+ * teléfono con modo oscuro activado se veía pantalla negra con texto invisible, porque el
+ * navegador reinterpretaba los colores fijos de la página.
  */
 :root {
   color-scheme: light;
 }
 
 @theme inline {
-  --color-background: #ffffff;
-  --color-foreground: #171717;
+  --color-background: #fffbf5;
+  --color-foreground: #292524;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Paleta "colorida y divertida", con azul y verde como colores dominantes (brand + mint) y
+     grape/berry/sun como acentos ocasionales para variedad en badges. */
+  --color-cream: #f5faf9;
+  --color-ink: #1e293b;
+  --color-ink-soft: #64748b;
+
+  --color-brand: #2563eb;
+  --color-brand-dark: #1d4ed8;
+  --color-brand-light: #dbeafe;
+  --color-brand-text: #1e40af;
+
+  --color-mint: #059669;
+  --color-mint-dark: #047857;
+  --color-mint-light: #d1fae5;
+  --color-mint-text: #065f46;
+
+  --color-grape: #7c3aed;
+  --color-grape-dark: #6d28d9;
+  --color-grape-light: #ede9fe;
+  --color-grape-text: #5b21b6;
+
+  --color-berry: #db2777;
+  --color-berry-dark: #be185d;
+  --color-berry-light: #fce7f3;
+  --color-berry-text: #9d174d;
+
+  --color-sun: #d97706;
+  --color-sun-dark: #b45309;
+  --color-sun-light: #fef3c7;
+  --color-sun-text: #92400e;
 }
 
 body {
-  background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+}
+
+@layer components {
+  .card {
+    @apply rounded-3xl border border-black/5 bg-white p-5 shadow-[0_2px_16px_-6px_rgba(41,37,36,0.15)] sm:p-6;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-brand px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-brand/25 transition hover:bg-brand-dark active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full border-2 border-black/10 bg-white px-5 py-2.5 text-sm font-bold text-ink transition hover:border-brand hover:text-brand-dark active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-ink-soft transition hover:bg-black/5 active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-danger {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-full bg-berry px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-berry/25 transition hover:bg-berry-dark active:scale-95 disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .input {
+    @apply w-full rounded-2xl border-2 border-black/10 bg-white px-4 py-2.5 text-sm text-ink transition placeholder:text-ink-soft/60 focus:border-brand focus:outline-none;
+  }
+
+  .badge-brand {
+    @apply inline-flex items-center gap-1 rounded-full bg-brand-light px-3 py-1 text-xs font-bold text-brand-text;
+  }
+  .badge-mint {
+    @apply inline-flex items-center gap-1 rounded-full bg-mint-light px-3 py-1 text-xs font-bold text-mint-text;
+  }
+  .badge-grape {
+    @apply inline-flex items-center gap-1 rounded-full bg-grape-light px-3 py-1 text-xs font-bold text-grape-text;
+  }
+  .badge-berry {
+    @apply inline-flex items-center gap-1 rounded-full bg-berry-light px-3 py-1 text-xs font-bold text-berry-text;
+  }
+  .badge-sun {
+    @apply inline-flex items-center gap-1 rounded-full bg-sun-light px-3 py-1 text-xs font-bold text-sun-text;
+  }
 }

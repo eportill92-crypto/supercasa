@@ -15,17 +15,17 @@ export default async function InventarioPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold">Inventario de la cocina</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-3xl font-extrabold">📦 Inventario de la cocina</h1>
+        <p className="mt-1 text-sm text-ink-soft">
           Lo que tienes en casa ahora mismo. Usa un producto para descontarlo automáticamente, o
           ajusta la cantidad a mano tras contar la despensa.
         </p>
       </div>
 
-      <section className="rounded-lg border border-zinc-200 bg-white">
+      <section className="card overflow-x-auto !p-0">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-zinc-200 text-left text-xs uppercase tracking-wide text-zinc-500">
+            <tr className="border-b border-black/5 bg-brand-light/40 text-left text-xs font-bold uppercase tracking-wide text-brand-text">
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Cantidad</th>
               <th className="px-4 py-3">Mínimo</th>
@@ -39,10 +39,10 @@ export default async function InventarioPage() {
             {items.map((item) => {
               const low = item.quantity <= item.minThreshold;
               return (
-                <tr key={item.id} className="border-b border-zinc-100 last:border-0">
+                <tr key={item.id} className={`border-b border-black/5 last:border-0 ${low ? "bg-berry-light/25" : ""}`}>
                   <td className="px-4 py-3">
-                    <div className="font-medium text-zinc-900">{item.product.name}</div>
-                    <div className="text-xs text-zinc-400">
+                    <div className="font-bold text-ink">{item.product.name}</div>
+                    <div className="text-xs text-ink-soft">
                       {item.product.category ?? "Sin categoría"} · {item.product.unit}
                     </div>
                   </td>
@@ -56,14 +56,11 @@ export default async function InventarioPage() {
                         type="number"
                         step="0.5"
                         defaultValue={item.quantity}
-                        className={`w-20 rounded-md border px-2 py-1 text-sm ${
-                          low ? "border-red-300 bg-red-50 text-red-700" : "border-zinc-300"
+                        className={`w-20 rounded-xl border-2 px-2 py-1 text-sm ${
+                          low ? "border-berry/40 bg-white text-berry-text" : "border-black/10"
                         }`}
                       />
-                      <button
-                        type="submit"
-                        className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100"
-                      >
+                      <button type="submit" className="btn-ghost !px-2 !py-1 text-xs">
                         Guardar
                       </button>
                     </form>
@@ -78,12 +75,9 @@ export default async function InventarioPage() {
                         type="number"
                         step="0.5"
                         defaultValue={item.minThreshold}
-                        className="w-16 rounded-md border border-zinc-300 px-2 py-1 text-sm"
+                        className="w-16 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
                       />
-                      <button
-                        type="submit"
-                        className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100"
-                      >
+                      <button type="submit" className="btn-ghost !px-2 !py-1 text-xs">
                         ✓
                       </button>
                     </form>
@@ -99,25 +93,22 @@ export default async function InventarioPage() {
                         step="0.5"
                         defaultValue={item.targetQty ?? ""}
                         placeholder="auto"
-                        className="w-16 rounded-md border border-zinc-300 px-2 py-1 text-sm"
+                        className="w-16 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
                       />
-                      <button
-                        type="submit"
-                        className="rounded-md px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100"
-                      >
+                      <button type="submit" className="btn-ghost !px-2 !py-1 text-xs">
                         ✓
                       </button>
                     </form>
                   </td>
-                  <td className="px-4 py-3 text-xs text-zinc-500">
+                  <td className="px-4 py-3 text-xs">
                     {(() => {
                       const days = estimateDaysRemaining(item.quantity, usageRates.get(item.productId));
                       return days === null ? (
-                        <span className="text-zinc-300">Sin datos aún</span>
+                        <span className="text-ink-soft/60">Sin datos aún</span>
                       ) : days <= 5 ? (
-                        <span className="font-medium text-red-600">~{days} días</span>
+                        <span className="badge-berry">~{days} días</span>
                       ) : (
-                        <span>~{days} días</span>
+                        <span className="text-ink-soft">~{days} días</span>
                       );
                     })()}
                   </td>
@@ -129,11 +120,11 @@ export default async function InventarioPage() {
                         type="number"
                         step="0.5"
                         defaultValue={1}
-                        className="w-14 rounded-md border border-zinc-300 px-2 py-1 text-sm"
+                        className="w-14 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
                       />
                       <button
                         type="submit"
-                        className="rounded-md bg-zinc-900 px-2 py-1 text-xs font-medium text-white hover:bg-zinc-700"
+                        className="rounded-full bg-mint px-3 py-1.5 text-xs font-bold text-white transition hover:bg-mint-dark active:scale-95"
                       >
                         Usar
                       </button>
@@ -142,10 +133,7 @@ export default async function InventarioPage() {
                   <td className="px-4 py-3 text-right">
                     <form action={deletePantryItem}>
                       <input type="hidden" name="id" value={item.id} />
-                      <button
-                        type="submit"
-                        className="text-xs text-zinc-400 hover:text-red-600"
-                      >
+                      <button type="submit" className="text-xs font-semibold text-ink-soft hover:text-berry-text">
                         Quitar
                       </button>
                     </form>
@@ -155,7 +143,7 @@ export default async function InventarioPage() {
             })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-sm text-zinc-400">
+                <td colSpan={7} className="px-4 py-8 text-center text-sm text-ink-soft">
                   Aún no hay productos en el inventario.
                 </td>
               </tr>
@@ -164,33 +152,26 @@ export default async function InventarioPage() {
         </table>
       </section>
 
-      <section className="rounded-lg border border-zinc-200 bg-white p-5">
-        <h2 className="font-medium">Agregar producto nuevo</h2>
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-brand-text">
+          <span>➕</span> Agregar producto nuevo
+        </h2>
         <form action={addPantryProduct} className="mt-4 grid gap-3 sm:grid-cols-3">
           <input
             name="name"
             required
             placeholder="Nombre (ej. Leche entera 1L)"
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm sm:col-span-2"
+            className="input sm:col-span-2"
           />
-          <input
-            name="category"
-            placeholder="Categoría (opcional)"
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
-          <input
-            name="unit"
-            placeholder="Unidad (pza, kg, L...)"
-            defaultValue="pza"
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
-          />
+          <input name="category" placeholder="Categoría (opcional)" className="input" />
+          <input name="unit" placeholder="Unidad (pza, kg, L...)" defaultValue="pza" className="input" />
           <input
             name="quantity"
             type="number"
             step="0.5"
             placeholder="Cantidad actual"
             defaultValue={0}
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className="input"
           />
           <input
             name="minThreshold"
@@ -198,13 +179,10 @@ export default async function InventarioPage() {
             step="0.5"
             placeholder="Mínimo antes de reponer"
             defaultValue={1}
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className="input"
           />
           <div className="sm:col-span-3">
-            <button
-              type="submit"
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
-            >
+            <button type="submit" className="btn-primary">
               Agregar a la despensa
             </button>
           </div>

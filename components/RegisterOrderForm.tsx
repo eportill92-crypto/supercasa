@@ -45,7 +45,7 @@ export default function RegisterOrderForm({
 
     startTransition(async () => {
       await registerOrder({ items, source: "manual", notes: notes || undefined });
-      setMessage("Pedido registrado. El inventario ya se repuso.");
+      setMessage("Pedido registrado. El inventario ya se repuso. ✅");
       setRows([{ productId: products[0]?.id ?? "", quantity: 1 }]);
       setNotes("");
     });
@@ -58,7 +58,7 @@ export default function RegisterOrderForm({
           <select
             value={row.productId}
             onChange={(e) => updateRow(index, { productId: e.target.value })}
-            className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm"
+            className="input flex-1"
           >
             {products.map((p) => (
               <option key={p.id} value={p.id}>
@@ -71,23 +71,15 @@ export default function RegisterOrderForm({
             step="0.5"
             value={row.quantity}
             onChange={(e) => updateRow(index, { quantity: Number(e.target.value) })}
-            className="w-20 rounded-md border border-zinc-300 px-2 py-2 text-sm"
+            className="input w-20"
           />
-          <button
-            type="button"
-            onClick={() => removeRow(index)}
-            className="text-xs text-zinc-400 hover:text-red-600"
-          >
+          <button type="button" onClick={() => removeRow(index)} className="text-xs font-semibold text-ink-soft hover:text-berry-text">
             Quitar
           </button>
         </div>
       ))}
 
-      <button
-        type="button"
-        onClick={addRow}
-        className="self-start rounded-md px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-100"
-      >
+      <button type="button" onClick={addRow} className="btn-ghost self-start !px-2">
         + Agregar producto
       </button>
 
@@ -95,19 +87,14 @@ export default function RegisterOrderForm({
         value={notes}
         onChange={(e) => setNotes(e.target.value)}
         placeholder="Notas (opcional)"
-        className="rounded-md border border-zinc-300 px-3 py-2 text-sm"
+        className="input"
       />
 
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={submit}
-        className="self-start rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
-      >
+      <button type="button" disabled={isPending} onClick={submit} className="btn-primary self-start">
         {isPending ? "Guardando..." : "Registrar pedido y reponer inventario"}
       </button>
 
-      {message && <p className="text-sm text-emerald-600">{message}</p>}
+      {message && <p className="text-sm font-semibold text-mint-text">{message}</p>}
     </div>
   );
 }

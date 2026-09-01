@@ -29,30 +29,30 @@ export default async function MenuSemanalPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold">Menú semanal</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-3xl font-extrabold">📅 Menú semanal</h1>
+        <p className="mt-1 text-sm text-ink-soft">
           Asigna una receta a cada comida y márcala como preparada cuando la cocines: el
           inventario se descuenta solo.
         </p>
       </div>
 
-      <div className="flex items-center justify-between text-sm">
-        <Link href={`/menu-semanal?week=${prevWeek}`} className="text-zinc-500 hover:underline">
-          ← Semana anterior
+      <div className="card flex items-center justify-between !py-3 text-sm">
+        <Link href={`/menu-semanal?week=${prevWeek}`} className="btn-ghost !px-3">
+          ← Anterior
         </Link>
-        <span className="font-medium">
+        <span className="font-bold text-brand-text">
           {weekStart.toLocaleDateString("es-MX", { day: "numeric", month: "short" })} –{" "}
           {weekEnd.toLocaleDateString("es-MX", { day: "numeric", month: "short" })}
         </span>
-        <Link href={`/menu-semanal?week=${nextWeek}`} className="text-zinc-500 hover:underline">
-          Semana siguiente →
+        <Link href={`/menu-semanal?week=${nextWeek}`} className="btn-ghost !px-3">
+          Siguiente →
         </Link>
       </div>
 
       {recipes.length === 0 ? (
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-ink-soft">
           Aún no hay recetas. Agrega una en{" "}
-          <Link href="/recetas" className="underline">
+          <Link href="/recetas" className="font-bold text-brand underline">
             Recetas
           </Link>
           .

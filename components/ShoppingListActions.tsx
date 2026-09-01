@@ -37,7 +37,7 @@ export default function ShoppingListActions({ rows }: { rows: ShoppingListRow[] 
     startTransition(async () => {
       try {
         await registerOrder({ items: selectedItems, source: "manual" });
-        setResult("Pedido registrado manualmente y el inventario se repuso.");
+        setResult("Pedido registrado manualmente y el inventario se repuso. ✅");
       } catch (err) {
         setResult(err instanceof Error ? err.message : "Error al registrar el pedido");
       }
@@ -46,34 +46,35 @@ export default function ShoppingListActions({ rows }: { rows: ShoppingListRow[] 
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col divide-y divide-zinc-100">
+      <div className="flex flex-col divide-y divide-black/5">
         {rows.map((row) => (
-          <div key={row.productId} className="flex items-center gap-3 py-2">
+          <div key={row.productId} className="flex items-center gap-3 py-2.5">
             <input
               type="checkbox"
               checked={selected[row.productId] ?? true}
-              onChange={(e) =>
-                setSelected((prev) => ({ ...prev, [row.productId]: e.target.checked }))
-              }
+              onChange={(e) => setSelected((prev) => ({ ...prev, [row.productId]: e.target.checked }))}
+              className="h-4 w-4 accent-brand"
             />
             <div className="flex-1">
-              <div className="text-sm font-medium">{row.name}</div>
-              <div className="text-xs text-zinc-400">
-                {row.reason === "stock_bajo"
-                  ? `Tienes ${row.currentQty} ${row.unit}, mínimo ${row.minThreshold}`
-                  : "Agregado manualmente"}
+              <div className="text-sm font-bold">{row.name}</div>
+              <div className="text-xs">
+                {row.reason === "stock_bajo" ? (
+                  <span className="badge-sun">
+                    Tienes {row.currentQty} {row.unit}, mínimo {row.minThreshold}
+                  </span>
+                ) : (
+                  <span className="badge-grape">Agregado manualmente</span>
+                )}
               </div>
             </div>
             <input
               type="number"
               step="0.5"
               value={quantities[row.productId] ?? row.suggestedQty}
-              onChange={(e) =>
-                setQuantities((prev) => ({ ...prev, [row.productId]: Number(e.target.value) }))
-              }
-              className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-sm"
+              onChange={(e) => setQuantities((prev) => ({ ...prev, [row.productId]: Number(e.target.value) }))}
+              className="w-20 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
             />
-            <span className="w-10 text-xs text-zinc-400">{row.unit}</span>
+            <span className="w-10 text-xs text-ink-soft">{row.unit}</span>
           </div>
         ))}
       </div>
@@ -83,30 +84,28 @@ export default function ShoppingListActions({ rows }: { rows: ShoppingListRow[] 
           type="button"
           disabled={isPending || selectedItems.length === 0}
           onClick={orderAutomatically}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50"
+          className="btn-primary"
         >
-          {isPending ? "Pidiendo..." : "Pedir en La Comer (automático)"}
+          {isPending ? "Pidiendo..." : "🤖 Pedir en La Comer (automático)"}
         </button>
         <button
           type="button"
           disabled={isPending || selectedItems.length === 0}
           onClick={registerManually}
-          className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+          className="btn-secondary"
         >
           Ya lo compré manualmente
         </button>
       </div>
 
-      <p className="text-xs text-zinc-400">
+      <p className="text-xs text-ink-soft">
         &quot;Pedir en La Comer&quot; usa el robot de compra (Playwright) con tus credenciales
         guardadas y tu dirección de entrega, con pago contra entrega. Requiere que los
         selectores en <code>lib/lacomer/config.ts</code> ya estén verificados contra el sitio
         real — ver README.
       </p>
 
-      {result && (
-        <div className="rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-700">{result}</div>
-      )}
+      {result && <div className="card !p-3 bg-brand-light/40 text-sm text-brand-text">{result}</div>}
     </div>
   );
 }

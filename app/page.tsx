@@ -21,35 +21,38 @@ export default async function Home() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-2xl font-semibold">Hola 👋</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-3xl font-extrabold">Hola 👋</h1>
+        <p className="mt-1 text-sm text-ink-soft">
           Así está tu despensa hoy, {new Date().toLocaleDateString("es-MX", { dateStyle: "long" })}.
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard label="Productos en inventario" value={pantry.length} href="/inventario" />
+        <StatCard icon="📦" label="Productos en inventario" value={pantry.length} href="/inventario" color="brand" />
         <StatCard
+          icon="🛒"
           label="Faltantes en la lista"
           value={shoppingList.length}
           href="/lista-compra"
-          alert={shoppingList.length > 0}
+          color={shoppingList.length > 0 ? "sun" : "mint"}
         />
         <StatCard
+          icon="⚠️"
           label="Con stock bajo"
           value={lowStockCount}
           href="/inventario"
-          alert={lowStockCount > 0}
+          color={lowStockCount > 0 ? "berry" : "mint"}
         />
       </div>
 
       {!readyToAutomate && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <div className="card border-sun/30 bg-sun-light/60 text-sm text-sun-text">
+          <span className="mr-1">💡</span>
           Para poder pedir automáticamente en La Comer necesitas guardar{" "}
           {!configured && "tus credenciales"}
           {!configured && !address && " y "}
           {!address && "tu dirección de entrega"} en{" "}
-          <Link href="/configuracion" className="font-medium underline">
+          <Link href="/configuracion" className="font-bold underline">
             Configuración
           </Link>
           .
@@ -57,46 +60,47 @@ export default async function Home() {
       )}
 
       <div className="grid gap-6 sm:grid-cols-2">
-        <section className="rounded-lg border border-zinc-200 bg-white p-5">
-          <h2 className="font-medium">Lista de compra actual</h2>
+        <section className="card">
+          <h2 className="flex items-center gap-2 font-bold text-brand-text">
+            <span>🛒</span> Lista de compra actual
+          </h2>
           {shoppingList.length === 0 ? (
-            <p className="mt-3 text-sm text-zinc-400">Todo en orden, no falta nada.</p>
+            <p className="mt-3 text-sm text-ink-soft">Todo en orden, no falta nada. ✨</p>
           ) : (
-            <ul className="mt-3 flex flex-col gap-1 text-sm">
+            <ul className="mt-3 flex flex-col gap-1.5 text-sm">
               {shoppingList.slice(0, 6).map((row) => (
                 <li key={row.productId} className="flex justify-between">
                   <span>{row.name}</span>
-                  <span className="text-zinc-400">
+                  <span className="font-semibold text-ink-soft">
                     {row.suggestedQty} {row.unit}
                   </span>
                 </li>
               ))}
             </ul>
           )}
-          <Link
-            href="/lista-compra"
-            className="mt-4 inline-block text-sm font-medium text-zinc-900 underline"
-          >
+          <Link href="/lista-compra" className="btn-ghost mt-4 -ml-4 !px-4">
             Ir a la lista de compra →
           </Link>
         </section>
 
-        <section className="rounded-lg border border-zinc-200 bg-white p-5">
-          <h2 className="font-medium">Último pedido</h2>
+        <section className="card">
+          <h2 className="flex items-center gap-2 font-bold text-mint-text">
+            <span>📋</span> Último pedido
+          </h2>
           {lastOrder ? (
             <>
-              <p className="mt-1 text-xs text-zinc-400">
+              <p className="mt-1 text-xs text-ink-soft">
                 {new Date(lastOrder.placedAt).toLocaleString("es-MX", {
                   dateStyle: "medium",
                   timeStyle: "short",
                 })}{" "}
-                · {lastOrder.source === "automatico" ? "Automático" : "Manual"}
+                · {lastOrder.source === "automatico" ? "🤖 Automático" : "✍️ Manual"}
               </p>
-              <ul className="mt-3 flex flex-col gap-1 text-sm">
+              <ul className="mt-3 flex flex-col gap-1.5 text-sm">
                 {lastOrder.items.slice(0, 6).map((item) => (
                   <li key={item.id} className="flex justify-between">
                     <span>{item.product.name}</span>
-                    <span className="text-zinc-400">
+                    <span className="font-semibold text-ink-soft">
                       {item.quantity} {item.product.unit}
                     </span>
                   </li>
@@ -104,12 +108,9 @@ export default async function Home() {
               </ul>
             </>
           ) : (
-            <p className="mt-3 text-sm text-zinc-400">Aún no has registrado ningún pedido.</p>
+            <p className="mt-3 text-sm text-ink-soft">Aún no has registrado ningún pedido.</p>
           )}
-          <Link
-            href="/pedidos"
-            className="mt-4 inline-block text-sm font-medium text-zinc-900 underline"
-          >
+          <Link href="/pedidos" className="btn-ghost mt-4 -ml-4 !px-4">
             Ver historial de pedidos →
           </Link>
         </section>
@@ -118,26 +119,38 @@ export default async function Home() {
   );
 }
 
+const STAT_COLORS = {
+  brand: "border-brand/20 bg-brand-light/60 text-brand-text",
+  mint: "border-mint/20 bg-mint-light/60 text-mint-text",
+  sun: "border-sun/30 bg-sun-light/60 text-sun-text",
+  berry: "border-berry/20 bg-berry-light/60 text-berry-text",
+} as const;
+
 function StatCard({
+  icon,
   label,
   value,
   href,
-  alert,
+  color,
 }: {
+  icon: string;
   label: string;
   value: number;
   href: string;
-  alert?: boolean;
+  color: keyof typeof STAT_COLORS;
 }) {
   return (
     <Link
       href={href}
-      className={`rounded-lg border p-5 transition hover:shadow-sm ${
-        alert ? "border-amber-300 bg-amber-50" : "border-zinc-200 bg-white"
-      }`}
+      className={`flex items-center gap-4 rounded-3xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${STAT_COLORS[color]}`}
     >
-      <div className="text-3xl font-semibold">{value}</div>
-      <div className="mt-1 text-sm text-zinc-500">{label}</div>
+      <span className="text-3xl" aria-hidden>
+        {icon}
+      </span>
+      <div>
+        <div className="text-3xl font-extrabold">{value}</div>
+        <div className="text-sm font-medium opacity-80">{label}</div>
+      </div>
     </Link>
   );
 }

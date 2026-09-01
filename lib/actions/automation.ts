@@ -28,6 +28,17 @@ export async function runLacomerOrder(input: RunAutomationInput): Promise<RunAut
   const items = input.items.filter((i) => i.quantity > 0);
   if (items.length === 0) throw new Error("No hay productos para pedir");
 
+  // En Vercel no se descargó el navegador de Playwright a propósito (build más rápido y
+  // liviano) y las funciones serverless no están pensadas para procesos tan largos, así que
+  // el robot de compra no puede correr ahí. Falla con un mensaje claro en vez de un error de
+  // módulo confuso; usa `npm run lacomer:order` en tu propia máquina/servidor, o activa
+  // LACOMER_DRY_RUN=true para probar el resto del flujo sin abrir un navegador real.
+  if (process.env.VERCEL && process.env.LACOMER_DRY_RUN !== "true") {
+    throw new Error(
+      "El robot de compra no puede correr en Vercel (no tiene el navegador instalado ni está pensado para procesos largos). Corre `npm run lacomer:order` en tu propia máquina/servidor, o registra el pedido manualmente con \"Ya lo compré manualmente\"."
+    );
+  }
+
   const [credential, address, products] = await Promise.all([
     prisma.credential.findUnique({ where: { provider: "lacomer" } }),
     prisma.deliveryAddress.findFirst({ where: { isDefault: true } }),

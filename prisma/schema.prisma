@@ -1,0 +1,113 @@
+// Modelo de datos de SuperCasa: inventario de despensa, pedidos y automatización de compra en La Comer.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id         String   @id @default(cuid())
+  name       String   @unique
+  unit       String   @default("pza") // pza, kg, L, paquete, etc.
+  category   String?
+  lacomerUrl String? // URL del producto en lacomer.com.mx, para automatizar el carrito
+  lacomerSku String?
+  createdAt  DateTime @default(now())
+
+  pantryItem       PantryItem?
+  orderItems       OrderItem[]
+  usageEvents      UsageEvent[]
+  shoppingListItem ShoppingListItem[]
+}
+
+model PantryItem {
+  id           String   @id @default(cuid())
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId    String   @unique
+  quantity     Float    @default(0) // cantidad actual en la cocina
+  minThreshold Float    @default(0) // por debajo de esto, se considera "falta"
+  targetQty    Float? // cantidad ideal a tener tras reponer (si no se define, se usa minThreshold * 2)
+  updatedAt    DateTime @updatedAt
+}
+
+// Un pedido hecho en La Comer (o registrado manualmente porque se hizo en tienda física).
+model Order {
+  id             String          @id @default(cuid())
+  placedAt       DateTime        @default(now())
+  status         String          @default("registrado") // registrado | procesando | completado | fallido
+  source         String          @default("manual") // manual | automatico
+  total          Float?
+  notes          String?
+  items          OrderItem[]
+  automationLogs AutomationLog[]
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Float
+  unitPrice Float?
+}
+
+// Cada vez que se "usa" un producto de la despensa, se registra aquí y se descuenta del inventario.
+model UsageEvent {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  quantity  Float
+  usedAt    DateTime @default(now())
+  note      String?
+}
+
+// Faltantes agregados manualmente (además de lo que el sistema detecta por stock bajo).
+model ShoppingListItem {
+  id        String   @id @default(cuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  quantity  Float
+  addedAt   DateTime @default(now())
+  fulfilled Boolean  @default(false)
+}
+
+// Credenciales de La Comer, guardadas cifradas (ver lib/crypto.ts). Nunca en texto plano.
+model Credential {
+  id          String   @id @default(cuid())
+  provider    String   @unique @default("lacomer")
+  emailEnc    String
+  passwordEnc String
+  updatedAt   DateTime @updatedAt
+}
+
+model DeliveryAddress {
+  id           String   @id @default(cuid())
+  label        String   @default("Casa")
+  street       String
+  extNumber    String?
+  intNumber    String?
+  neighborhood String?
+  city         String
+  state        String
+  zip          String
+  phone        String?
+  isDefault    Boolean  @default(true)
+  updatedAt    DateTime @updatedAt
+}
+
+// Historial de corridas del robot de automatización contra La Comer.
+model AutomationLog {
+  id             String    @id @default(cuid())
+  order          Order?    @relation(fields: [orderId], references: [id])
+  orderId        String?
+  startedAt      DateTime  @default(now())
+  finishedAt     DateTime?
+  status         String    @default("running") // running | success | error
+  message        String?
+  screenshotPath String?
+}

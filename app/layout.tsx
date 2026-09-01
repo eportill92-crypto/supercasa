@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { auth } from "@/auth";
@@ -18,6 +18,13 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SuperCasa",
   description: "Inventario de despensa y pedidos automáticos a La Comer",
+};
+
+// La app solo tiene tema claro por ahora. Sin esto, algunos navegadores móviles (ej. "Forzar
+// oscuro" de Chrome en Android) reinterpretan los colores fijos de la página y dejan texto
+// invisible sobre fondo negro.
+export const viewport: Viewport = {
+  colorScheme: "light",
 };
 
 const NAV_LINKS = [

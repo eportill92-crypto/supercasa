@@ -21,6 +21,7 @@ model User {
   image         String?
   passwordHash  String? // null si el usuario solo inició sesión con Google
   createdAt     DateTime  @default(now())
+  autoOrderEnabled Boolean @default(false) // opt-in: si está activo, el robot programado (cron) lo incluye
 
   accounts Account[]
   sessions Session[]

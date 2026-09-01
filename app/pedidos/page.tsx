@@ -1,14 +1,17 @@
 export const dynamic = "force-dynamic";
 
 import { listOrders, getLastOrder, listAllProducts } from "@/lib/actions/orders";
+import { listAutomationLogs } from "@/lib/actions/automation";
 import RegisterOrderForm from "@/components/RegisterOrderForm";
 
 export default async function PedidosPage() {
-  const [orders, lastOrder, products] = await Promise.all([
+  const [orders, lastOrder, products, automationLogs] = await Promise.all([
     listOrders(),
     getLastOrder(),
     listAllProducts(),
+    listAutomationLogs(),
   ]);
+  const pendingOrErrorLogs = automationLogs.filter((l) => l.status !== "success");
 
   const initialRows =
     lastOrder?.items.map((i) => ({ productId: i.productId, quantity: i.quantity })) ?? [];
@@ -35,6 +38,42 @@ export default async function PedidosPage() {
           </div>
         )}
       </section>
+
+      {pendingOrErrorLogs.length > 0 && (
+        <section>
+          <h2 className="mb-3 font-medium">Robot de compra — en curso / con errores</h2>
+          <p className="mb-3 text-sm text-zinc-500">
+            Cuando el pedido se dispara desde el sitio en producción, corre en GitHub Actions y
+            puede tardar unos minutos en aparecer arriba en Pedidos. Aquí ves el estado mientras
+            tanto, o si algo falló.
+          </p>
+          <div className="flex flex-col gap-2">
+            {pendingOrErrorLogs.map((log) => (
+              <div
+                key={log.id}
+                className={`rounded-lg border p-3 text-sm ${
+                  log.status === "error"
+                    ? "border-red-200 bg-red-50 text-red-800"
+                    : "border-amber-200 bg-amber-50 text-amber-800"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">
+                    {log.status === "error" ? "Error" : "En proceso"}
+                  </span>
+                  <span className="text-xs opacity-70">
+                    {new Date(log.startedAt).toLocaleString("es-MX", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
+                </div>
+                {log.message && <p className="mt-1">{log.message}</p>}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section>
         <h2 className="mb-3 font-medium">Historial</h2>

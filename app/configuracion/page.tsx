@@ -6,12 +6,15 @@ import {
   hasLacomerCredentials,
   saveDeliveryAddress,
   getDefaultAddress,
+  getAutoOrderEnabled,
+  setAutoOrderEnabled,
 } from "@/lib/actions/settings";
 
 export default async function ConfiguracionPage() {
-  const [{ configured }, address] = await Promise.all([
+  const [{ configured }, address, autoOrderEnabled] = await Promise.all([
     hasLacomerCredentials(),
     getDefaultAddress(),
+    getAutoOrderEnabled(),
   ]);
 
   return (
@@ -134,6 +137,33 @@ export default async function ConfiguracionPage() {
               Guardar dirección
             </button>
           </div>
+        </form>
+      </section>
+
+      <section className="rounded-lg border border-zinc-200 bg-white p-5">
+        <h2 className="font-medium">Pedido automático programado</h2>
+        <p className="mt-1 text-sm text-zinc-500">
+          El botón &quot;Pedir en La Comer&quot; de la lista de compra siempre es manual — lo
+          disparas tú. Esto es aparte: si lo activas, un robot programado revisa tu lista de
+          compra todos los días y pide automáticamente lo que falte, usando tus credenciales y
+          dirección de arriba (necesitas tenerlas guardadas).
+        </p>
+        <form action={setAutoOrderEnabled} className="mt-4">
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              name="autoOrderEnabled"
+              defaultChecked={autoOrderEnabled}
+              className="h-4 w-4 rounded border-zinc-300"
+            />
+            Pedir automáticamente lo que falte, todos los días
+          </label>
+          <button
+            type="submit"
+            className="mt-3 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700"
+          >
+            Guardar
+          </button>
         </form>
       </section>
     </div>

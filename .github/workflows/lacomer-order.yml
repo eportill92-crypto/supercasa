@@ -1,0 +1,54 @@
+name: Robot de pedido La Comer
+
+# Corre el pedido automático en La Comer (Playwright) fuera de Vercel, que no puede correr un
+# navegador real. Dos formas de disparar esto:
+#
+#  1. Programado (cron): corre todos los días para cada usuario que activó "Pedido automático
+#     programado" en Configuración.
+#  2. Manual / por click ("workflow_dispatch"): corre para un solo usuario. Lo dispara la app
+#     web (botón "Pedir en La Comer") vía la API de GitHub, pasando el userId de quien lo pidió;
+#     también se puede correr a mano desde la pestaña Actions de este repo.
+on:
+  schedule:
+    # 13:00 UTC = 07:00 CDMX en horario estándar (UTC-6) / 08:00 en horario de verano (UTC-5).
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      userId:
+        description: "ID del usuario a pedir (vacío = todos los que activaron el pedido programado)"
+        required: false
+        type: string
+      dryRun:
+        description: "Simular sin abrir navegador real (para probar el flujo sin tocar lacomer.com.mx)"
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  pedido:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      LACOMER_DRY_RUN: ${{ github.event.inputs.dryRun == 'true' && 'true' || 'false' }}
+      TARGET_USER_ID: ${{ github.event.inputs.userId }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Instalar navegador de Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Correr el robot de pedido
+        run: npm run lacomer:order

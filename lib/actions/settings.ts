@@ -71,3 +71,19 @@ export async function getDefaultAddress() {
   const userId = await requireUserId();
   return prisma.deliveryAddress.findFirst({ where: { userId, isDefault: true } });
 }
+
+// Opt-in para el robot programado (cron de GitHub Actions): si está activo, cada corrida
+// programada revisa tu lista de compra y pide automáticamente lo que falte. El botón manual
+// "Pedir en La Comer" no depende de esto — es una acción explícita tuya cada vez.
+export async function getAutoOrderEnabled(): Promise<boolean> {
+  const userId = await requireUserId();
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { autoOrderEnabled: true } });
+  return user?.autoOrderEnabled ?? false;
+}
+
+export async function setAutoOrderEnabled(formData: FormData) {
+  const userId = await requireUserId();
+  const enabled = formData.get("autoOrderEnabled") === "on";
+  await prisma.user.update({ where: { id: userId }, data: { autoOrderEnabled: enabled } });
+  revalidatePath("/configuracion");
+}

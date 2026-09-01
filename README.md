@@ -10,13 +10,17 @@ App para automatizar el súper de la casa contra [lacomer.com.mx](https://www.la
 
 ## Stack
 
-Next.js (App Router) + TypeScript + Tailwind + Prisma (SQLite en desarrollo) + Playwright.
+Next.js (App Router) + TypeScript + Tailwind + Prisma (Postgres) + Playwright.
 
 ## Poner a andar el proyecto
+
+Necesitas una base Postgres (local, o gratis en [Supabase](https://supabase.com) / [Neon](https://neon.tech)). Si ya la conectaste como integración de un proyecto en Vercel, usa el valor de `POSTGRES_PRISMA_URL` como `DATABASE_URL` aquí abajo, y `POSTGRES_URL_NON_POOLING` cuando corras `db:push` (las operaciones de crear/alterar tablas no deben ir por la conexión con pooling).
 
 ```bash
 npm install
 cp .env.example .env
+# Pega tu cadena de conexión de Postgres en DATABASE_URL dentro de .env
+
 # Genera una clave real y ponla en ENCRYPTION_KEY dentro de .env:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
@@ -71,6 +75,8 @@ scripts/run-order.ts        CLI para disparar el pedido automático fuera de la 
 
 ## Despliegue en producción
 
-- Cambia `DATABASE_URL` a una base Postgres (Vercel Postgres, Neon, etc.) — SQLite no persiste en funciones serverless.
+- Conecta una base Postgres (Supabase, Neon, etc.) al proyecto en Vercel y usa la variable resultante (`POSTGRES_PRISMA_URL`) como `DATABASE_URL`.
 - Define `ENCRYPTION_KEY` como variable de entorno segura (nunca la subas al repo).
+- Define `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` para que el build no intente descargar Chromium.
+- Después de agregar/cambiar variables de entorno hace falta un **Redeploy** manual (Vercel no las aplica solo).
 - Ver la sección de automatización arriba sobre dónde correr el robot de Playwright.

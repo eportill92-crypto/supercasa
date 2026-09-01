@@ -1,15 +1,15 @@
 export const dynamic = "force-dynamic";
 
-import { computeShoppingList, addManualShoppingItem, removeManualShoppingItem } from "@/lib/actions/shopping-list";
-import { prisma } from "@/lib/prisma";
+import {
+  computeShoppingList,
+  addManualShoppingItem,
+  removeManualShoppingItem,
+  listManualShoppingItems,
+} from "@/lib/actions/shopping-list";
 import ShoppingListActions from "@/components/ShoppingListActions";
 
 export default async function ListaCompraPage() {
-  const rows = await computeShoppingList();
-  const manualItems = await prisma.shoppingListItem.findMany({
-    where: { fulfilled: false },
-    include: { product: true },
-  });
+  const [rows, manualItems] = await Promise.all([computeShoppingList(), listManualShoppingItems()]);
 
   return (
     <div className="flex flex-col gap-8">

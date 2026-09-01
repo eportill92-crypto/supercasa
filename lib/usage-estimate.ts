@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/session";
 
 const WINDOW_DAYS = 60;
 
@@ -6,12 +7,13 @@ const WINDOW_DAYS = 60;
 // en los últimos WINDOW_DAYS días. Útil sobre todo para cosas que se usan seguido y a ritmo
 // más o menos constante (higiene personal, limpieza), pero funciona para cualquier producto.
 export async function computeDailyUsageRates(): Promise<Map<string, number>> {
+  const userId = await requireUserId();
   const since = new Date();
   since.setDate(since.getDate() - WINDOW_DAYS);
 
   const events = await prisma.usageEvent.groupBy({
     by: ["productId"],
-    where: { usedAt: { gte: since } },
+    where: { userId, usedAt: { gte: since } },
     _sum: { quantity: true },
     _min: { usedAt: true },
   });

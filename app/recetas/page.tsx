@@ -42,9 +42,9 @@ export default async function RecetasPage() {
                       Tuya
                     </span>
                   )}
-                  {r.timesUsed > 0 && (
+                  {r.timesUsedByMe > 0 && (
                     <span className="ml-2 text-xs text-zinc-400">
-                      Preparada {r.timesUsed} {r.timesUsed === 1 ? "vez" : "veces"}
+                      La preparaste {r.timesUsedByMe} {r.timesUsedByMe === 1 ? "vez" : "veces"}
                     </span>
                   )}
                 </div>

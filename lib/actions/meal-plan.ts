@@ -2,12 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/session";
 import { addDays, type MealType } from "@/lib/date-utils";
 
 export async function getWeekMealPlan(weekStart: Date) {
+  const userId = await requireUserId();
   const weekEnd = addDays(weekStart, 7);
   const entries = await prisma.mealPlanEntry.findMany({
-    where: { date: { gte: weekStart, lt: weekEnd } },
+    where: { userId, date: { gte: weekStart, lt: weekEnd } },
     include: { recipe: true },
   });
   return entries;
@@ -19,10 +21,11 @@ export async function assignMeal(input: {
   recipeId: string;
   servings: number;
 }) {
+  const userId = await requireUserId();
   const date = new Date(`${input.date}T00:00:00.000Z`);
 
   const existing = await prisma.mealPlanEntry.findFirst({
-    where: { date, mealType: input.mealType },
+    where: { userId, date, mealType: input.mealType },
   });
 
   if (existing) {
@@ -32,7 +35,7 @@ export async function assignMeal(input: {
     });
   } else {
     await prisma.mealPlanEntry.create({
-      data: { date, mealType: input.mealType, recipeId: input.recipeId, servings: input.servings },
+      data: { userId, date, mealType: input.mealType, recipeId: input.recipeId, servings: input.servings },
     });
   }
 
@@ -40,19 +43,22 @@ export async function assignMeal(input: {
 }
 
 export async function removeMeal(formData: FormData) {
+  const userId = await requireUserId();
   const id = String(formData.get("id"));
-  await prisma.mealPlanEntry.delete({ where: { id } });
+  await prisma.mealPlanEntry.deleteMany({ where: { id, userId } });
   revalidatePath("/menu-semanal");
 }
 
 export type PrepareMealResult = { success: boolean; message: string };
 
 // Marca una comida planeada como preparada y descuenta sus ingredientes del inventario,
-// escalados según las porciones reales contra las porciones base de la receta.
+// escalados según las porciones reales contra las porciones base de la receta. Los
+// ingredientes se buscan por nombre en los productos del usuario (se crean si no existían).
 export async function prepareMeal(entryId: string): Promise<PrepareMealResult> {
   try {
-    const entry = await prisma.mealPlanEntry.findUnique({
-      where: { id: entryId },
+    const userId = await requireUserId();
+    const entry = await prisma.mealPlanEntry.findFirst({
+      where: { id: entryId, userId },
       include: { recipe: { include: { ingredients: true } } },
     });
     if (!entry) return { success: false, message: "Comida no encontrada" };
@@ -62,18 +68,29 @@ export async function prepareMeal(entryId: string): Promise<PrepareMealResult> {
 
     for (const ing of entry.recipe.ingredients) {
       const scaledQty = Math.round(ing.quantity * scale * 100) / 100;
-      const pantryItem = await prisma.pantryItem.findUnique({ where: { productId: ing.productId } });
 
+      const product = await prisma.product.upsert({
+        where: { userId_name: { userId, name: ing.name } },
+        update: {},
+        create: { userId, name: ing.name, unit: ing.unit },
+      });
+
+      const pantryItem = await prisma.pantryItem.findUnique({ where: { productId: product.id } });
       if (pantryItem) {
         await prisma.pantryItem.update({
-          where: { productId: ing.productId },
+          where: { productId: product.id },
           data: { quantity: Math.max(0, pantryItem.quantity - scaledQty) },
+        });
+      } else {
+        await prisma.pantryItem.create({
+          data: { userId, productId: product.id, quantity: 0, minThreshold: 0 },
         });
       }
 
       await prisma.usageEvent.create({
         data: {
-          productId: ing.productId,
+          userId,
+          productId: product.id,
           quantity: scaledQty,
           note: `Receta: ${entry.recipe.name}`,
         },

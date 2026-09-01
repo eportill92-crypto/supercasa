@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
 import { registerOrder } from "@/lib/actions/orders";
+import { requireUserId } from "@/lib/session";
 import type { OrderLineItem } from "@/lib/lacomer/automate";
 
 export type RunAutomationInput = {
@@ -31,6 +32,7 @@ export type RunAutomationResult = {
 // dejaría al usuario viendo un error genérico de React en vez del mensaje explicativo.
 export async function runLacomerOrder(input: RunAutomationInput): Promise<RunAutomationResult> {
   try {
+    const userId = await requireUserId();
     const items = input.items.filter((i) => i.quantity > 0);
     if (items.length === 0) {
       return { logId: "", success: false, message: "No hay productos para pedir" };
@@ -51,9 +53,9 @@ export async function runLacomerOrder(input: RunAutomationInput): Promise<RunAut
     }
 
     const [credential, address, products] = await Promise.all([
-      prisma.credential.findUnique({ where: { provider: "lacomer" } }),
-      prisma.deliveryAddress.findFirst({ where: { isDefault: true } }),
-      prisma.product.findMany({ where: { id: { in: items.map((i) => i.productId) } } }),
+      prisma.credential.findUnique({ where: { userId } }),
+      prisma.deliveryAddress.findFirst({ where: { userId, isDefault: true } }),
+      prisma.product.findMany({ where: { userId, id: { in: items.map((i) => i.productId) } } }),
     ]);
 
     if (!credential) {
@@ -91,7 +93,7 @@ export async function runLacomerOrder(input: RunAutomationInput): Promise<RunAut
     });
 
     const log = await prisma.automationLog.create({
-      data: { status: "running", message: "Iniciando automatización" },
+      data: { userId, status: "running", message: "Iniciando automatización" },
     });
 
     const email = decrypt(credential.emailEnc);
@@ -164,5 +166,6 @@ export async function runLacomerOrder(input: RunAutomationInput): Promise<RunAut
 }
 
 export async function listAutomationLogs() {
-  return prisma.automationLog.findMany({ orderBy: { startedAt: "desc" }, take: 10 });
+  const userId = await requireUserId();
+  return prisma.automationLog.findMany({ where: { userId }, orderBy: { startedAt: "desc" }, take: 10 });
 }

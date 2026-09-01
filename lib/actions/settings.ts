@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
+import { requireUserId } from "@/lib/session";
 
 export async function saveLacomerCredentials(formData: FormData) {
+  const userId = await requireUserId();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
 
@@ -13,27 +15,29 @@ export async function saveLacomerCredentials(formData: FormData) {
   }
 
   await prisma.credential.upsert({
-    where: { provider: "lacomer" },
+    where: { userId },
     update: { emailEnc: encrypt(email), passwordEnc: encrypt(password) },
-    create: { provider: "lacomer", emailEnc: encrypt(email), passwordEnc: encrypt(password) },
+    create: { userId, provider: "lacomer", emailEnc: encrypt(email), passwordEnc: encrypt(password) },
   });
 
   revalidatePath("/configuracion");
 }
 
 export async function clearLacomerCredentials() {
-  await prisma.credential.deleteMany({ where: { provider: "lacomer" } });
+  const userId = await requireUserId();
+  await prisma.credential.deleteMany({ where: { userId } });
   revalidatePath("/configuracion");
 }
 
-export async function hasLacomerCredentials(): Promise<{ configured: boolean; emailMasked?: string }> {
-  const cred = await prisma.credential.findUnique({ where: { provider: "lacomer" } });
-  if (!cred) return { configured: false };
+export async function hasLacomerCredentials(): Promise<{ configured: boolean }> {
+  const userId = await requireUserId();
+  const cred = await prisma.credential.findUnique({ where: { userId } });
   // No desciframos aquí para no exponer el email completo en una vista de solo lectura.
-  return { configured: true };
+  return { configured: !!cred };
 }
 
 export async function saveDeliveryAddress(formData: FormData) {
+  const userId = await requireUserId();
   const street = String(formData.get("street") ?? "").trim();
   const extNumber = String(formData.get("extNumber") ?? "").trim() || null;
   const intNumber = String(formData.get("intNumber") ?? "").trim() || null;
@@ -47,7 +51,7 @@ export async function saveDeliveryAddress(formData: FormData) {
     throw new Error("Calle, ciudad, estado y código postal son obligatorios");
   }
 
-  const existing = await prisma.deliveryAddress.findFirst({ where: { isDefault: true } });
+  const existing = await prisma.deliveryAddress.findFirst({ where: { userId, isDefault: true } });
 
   if (existing) {
     await prisma.deliveryAddress.update({
@@ -56,7 +60,7 @@ export async function saveDeliveryAddress(formData: FormData) {
     });
   } else {
     await prisma.deliveryAddress.create({
-      data: { street, extNumber, intNumber, neighborhood, city, state, zip, phone, isDefault: true },
+      data: { userId, street, extNumber, intNumber, neighborhood, city, state, zip, phone, isDefault: true },
     });
   }
 
@@ -64,5 +68,6 @@ export async function saveDeliveryAddress(formData: FormData) {
 }
 
 export async function getDefaultAddress() {
-  return prisma.deliveryAddress.findFirst({ where: { isDefault: true } });
+  const userId = await requireUserId();
+  return prisma.deliveryAddress.findFirst({ where: { userId, isDefault: true } });
 }

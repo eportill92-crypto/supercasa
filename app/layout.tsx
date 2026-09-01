@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { auth } from "@/auth";
+import { logoutAction } from "@/lib/actions/auth";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +30,9 @@ const NAV_LINKS = [
   { href: "/configuracion", label: "Configuración" },
 ];
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const session = await auth();
+
   return (
     <html
       lang="es"
@@ -36,21 +40,52 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-900">
         <header className="border-b border-zinc-200 bg-white">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
-            <Link href="/" className="text-lg font-semibold tracking-tight">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+            <Link href="/" className="shrink-0 text-lg font-semibold tracking-tight">
               🛒 SuperCasa
             </Link>
-            <nav className="flex gap-1 text-sm">
-              {NAV_LINKS.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-md px-3 py-1.5 font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+            {session?.user && (
+              <nav className="flex flex-1 flex-wrap gap-1 text-sm">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-md px-3 py-1.5 font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+            )}
+            <div className="flex shrink-0 items-center gap-3 text-sm">
+              {session?.user ? (
+                <>
+                  <span className="hidden text-zinc-500 sm:inline">
+                    {session.user.email}
+                  </span>
+                  <form action={logoutAction}>
+                    <button
+                      type="submit"
+                      className="rounded-md px-3 py-1.5 font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="font-medium text-zinc-600 hover:text-zinc-900">
+                    Iniciar sesión
+                  </Link>
+                  <Link
+                    href="/registro"
+                    className="rounded-md bg-zinc-900 px-3 py-1.5 font-medium text-white hover:bg-zinc-700"
+                  >
+                    Crear cuenta
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">

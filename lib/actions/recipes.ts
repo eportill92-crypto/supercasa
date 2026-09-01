@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/session";
 
 export type RecipeIngredientInput = {
   productName: string;
@@ -24,36 +25,46 @@ export type RecipeRecommendation = {
   servings: number;
   instructions: string | null;
   source: string;
-  timesUsed: number;
+  timesUsedByMe: number;
   haveCount: number;
   totalCount: number;
-  missing: { productId: string; name: string; unit: string; needed: number; have: number }[];
+  missing: { name: string; unit: string; needed: number; have: number }[];
 };
 
 // Recetas ordenadas para recomendar qué cocinar con lo que hay ahora en el inventario.
-// Prioriza: 1) recetas propias, 2) recetas ya cocinadas antes, 3) qué tanto de la receta ya
-// tienes en casa.
+// Prioriza: 1) recetas propias, 2) recetas que este usuario ya cocinó, 3) qué tanto de la
+// receta ya tiene en casa. Incluye las recetas base (compartidas) y las propias del usuario.
 export async function getRecipeRecommendations(): Promise<RecipeRecommendation[]> {
-  const [recipes, pantryItems] = await Promise.all([
-    prisma.recipe.findMany({ include: { ingredients: { include: { product: true } } } }),
-    prisma.pantryItem.findMany(),
+  const userId = await requireUserId();
+
+  const [recipes, pantryItems, myUsageCounts] = await Promise.all([
+    prisma.recipe.findMany({
+      where: { OR: [{ userId: null }, { userId }] },
+      include: { ingredients: true },
+    }),
+    prisma.pantryItem.findMany({ where: { userId }, include: { product: true } }),
+    prisma.mealPlanEntry.groupBy({
+      by: ["recipeId"],
+      where: { userId, prepared: true },
+      _count: { _all: true },
+    }),
   ]);
 
-  const pantryByProduct = new Map(pantryItems.map((p) => [p.productId, p.quantity]));
+  const pantryByName = new Map(pantryItems.map((p) => [p.product.name, p.quantity]));
+  const myUsageByRecipe = new Map(myUsageCounts.map((c) => [c.recipeId, c._count._all]));
 
   const recommendations: RecipeRecommendation[] = recipes.map((recipe) => {
     const missing: RecipeRecommendation["missing"] = [];
     let haveCount = 0;
 
     for (const ing of recipe.ingredients) {
-      const have = pantryByProduct.get(ing.productId) ?? 0;
+      const have = pantryByName.get(ing.name) ?? 0;
       if (have >= ing.quantity) {
         haveCount += 1;
       } else {
         missing.push({
-          productId: ing.productId,
-          name: ing.product.name,
-          unit: ing.product.unit,
+          name: ing.name,
+          unit: ing.unit,
           needed: Math.round((ing.quantity - have) * 100) / 100,
           have,
         });
@@ -66,8 +77,8 @@ export async function getRecipeRecommendations(): Promise<RecipeRecommendation[]
       mealType: recipe.mealType,
       servings: recipe.servings,
       instructions: recipe.instructions,
-      source: recipe.source,
-      timesUsed: recipe.timesUsed,
+      source: recipe.userId ? "user" : "seed",
+      timesUsedByMe: myUsageByRecipe.get(recipe.id) ?? 0,
       haveCount,
       totalCount: recipe.ingredients.length,
       missing,
@@ -75,7 +86,7 @@ export async function getRecipeRecommendations(): Promise<RecipeRecommendation[]
   });
 
   recommendations.sort((a, b) => {
-    const priority = (r: RecipeRecommendation) => (r.source === "user" ? 2 : r.timesUsed > 0 ? 1 : 0);
+    const priority = (r: RecipeRecommendation) => (r.source === "user" ? 2 : r.timesUsedByMe > 0 ? 1 : 0);
     const pDiff = priority(b) - priority(a);
     if (pDiff !== 0) return pDiff;
 
@@ -83,37 +94,30 @@ export async function getRecipeRecommendations(): Promise<RecipeRecommendation[]
     const matchB = b.totalCount === 0 ? 0 : b.haveCount / b.totalCount;
     if (matchB !== matchA) return matchB - matchA;
 
-    return b.timesUsed - a.timesUsed;
+    return b.timesUsedByMe - a.timesUsedByMe;
   });
 
   return recommendations;
 }
 
 export async function addRecipe(input: AddRecipeInput) {
+  const userId = await requireUserId();
   const ingredients = input.ingredients.filter((i) => i.productName.trim() && i.quantity > 0);
   if (!input.name.trim()) throw new Error("La receta necesita un nombre");
   if (ingredients.length === 0) throw new Error("Agrega al menos un ingrediente");
 
-  const products = await Promise.all(
-    ingredients.map((i) =>
-      prisma.product.upsert({
-        where: { name: i.productName.trim() },
-        update: {},
-        create: { name: i.productName.trim(), unit: i.unit || "pza" },
-      })
-    )
-  );
-
   await prisma.recipe.create({
     data: {
+      userId,
       name: input.name.trim(),
       source: "user",
       mealType: input.mealType || undefined,
       servings: input.servings > 0 ? input.servings : 4,
       instructions: input.instructions?.trim() || undefined,
       ingredients: {
-        create: ingredients.map((i, idx) => ({
-          productId: products[idx].id,
+        create: ingredients.map((i) => ({
+          name: i.productName.trim(),
+          unit: i.unit || "pza",
           quantity: i.quantity,
         })),
       },
@@ -125,21 +129,28 @@ export async function addRecipe(input: AddRecipeInput) {
 }
 
 export async function deleteRecipe(formData: FormData) {
+  const userId = await requireUserId();
   const id = String(formData.get("id"));
-  await prisma.recipe.delete({ where: { id } });
+  await prisma.recipe.deleteMany({ where: { id, userId } });
   revalidatePath("/recetas");
   revalidatePath("/menu-semanal");
 }
 
 // Agrega a la lista de compra lo que le falta a una receta para poder cocinarla.
 export async function addMissingIngredientsToShoppingList(recipeId: string) {
+  const userId = await requireUserId();
   const recommendations = await getRecipeRecommendations();
   const recipe = recommendations.find((r) => r.id === recipeId);
   if (!recipe) throw new Error("Receta no encontrada");
 
   for (const item of recipe.missing) {
+    const product = await prisma.product.upsert({
+      where: { userId_name: { userId, name: item.name } },
+      update: {},
+      create: { userId, name: item.name, unit: item.unit },
+    });
     await prisma.shoppingListItem.create({
-      data: { productId: item.productId, quantity: item.needed },
+      data: { userId, productId: product.id, quantity: item.needed },
     });
   }
 
@@ -148,8 +159,10 @@ export async function addMissingIngredientsToShoppingList(recipeId: string) {
 }
 
 export async function listAllRecipes() {
+  const userId = await requireUserId();
   return prisma.recipe.findMany({
-    include: { ingredients: { include: { product: true } } },
+    where: { OR: [{ userId: null }, { userId }] },
+    include: { ingredients: true },
     orderBy: { name: "asc" },
   });
 }

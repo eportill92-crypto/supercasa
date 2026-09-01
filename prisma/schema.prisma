@@ -1,4 +1,6 @@
-// Modelo de datos de SuperCasa: inventario de despensa, pedidos y automatización de compra en La Comer.
+// Modelo de datos de SuperCasa: cuentas de usuario, inventario de despensa, pedidos y
+// automatización de compra en La Comer. Cada usuario tiene su propia despensa, pedidos,
+// recetas y credenciales — todo separado por cuenta.
 
 generator client {
   provider = "prisma-client-js"
@@ -9,9 +11,74 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// --- Cuentas (Auth.js) ---
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String? // null si el usuario solo inició sesión con Google
+  createdAt     DateTime  @default(now())
+
+  accounts Account[]
+  sessions Session[]
+
+  products          Product[]
+  pantryItems       PantryItem[]
+  orders            Order[]
+  usageEvents       UsageEvent[]
+  shoppingListItems ShoppingListItem[]
+  credential        Credential?
+  addresses         DeliveryAddress[]
+  recipes           Recipe[]
+  mealPlanEntries   MealPlanEntry[]
+  automationLogs    AutomationLog[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- Despensa y pedidos ---
+
 model Product {
   id         String   @id @default(cuid())
-  name       String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+  name       String
   unit       String   @default("pza") // pza, kg, L, paquete, etc.
   category   String?
   lacomerUrl String? // URL del producto en lacomer.com.mx, para automatizar el carrito
@@ -22,11 +89,14 @@ model Product {
   orderItems        OrderItem[]
   usageEvents       UsageEvent[]
   shoppingListItem  ShoppingListItem[]
-  recipeIngredients RecipeIngredient[]
+
+  @@unique([userId, name])
 }
 
 model PantryItem {
   id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
   product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId    String   @unique
   quantity     Float    @default(0) // cantidad actual en la cocina
@@ -38,6 +108,8 @@ model PantryItem {
 // Un pedido hecho en La Comer (o registrado manualmente porque se hizo en tienda física).
 model Order {
   id             String          @id @default(cuid())
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
   placedAt       DateTime        @default(now())
   status         String          @default("registrado") // registrado | procesando | completado | fallido
   source         String          @default("manual") // manual | automatico
@@ -60,6 +132,8 @@ model OrderItem {
 // Cada vez que se "usa" un producto de la despensa, se registra aquí y se descuenta del inventario.
 model UsageEvent {
   id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
   quantity  Float
@@ -70,6 +144,8 @@ model UsageEvent {
 // Faltantes agregados manualmente (además de lo que el sistema detecta por stock bajo).
 model ShoppingListItem {
   id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String
   quantity  Float
@@ -80,7 +156,9 @@ model ShoppingListItem {
 // Credenciales de La Comer, guardadas cifradas (ver lib/crypto.ts). Nunca en texto plano.
 model Credential {
   id          String   @id @default(cuid())
-  provider    String   @unique @default("lacomer")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String   @unique
+  provider    String   @default("lacomer")
   emailEnc    String
   passwordEnc String
   updatedAt   DateTime @updatedAt
@@ -88,6 +166,8 @@ model Credential {
 
 model DeliveryAddress {
   id           String   @id @default(cuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
   label        String   @default("Casa")
   street       String
   extNumber    String?
@@ -104,6 +184,8 @@ model DeliveryAddress {
 // Historial de corridas del robot de automatización contra La Comer.
 model AutomationLog {
   id             String    @id @default(cuid())
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
   order          Order?    @relation(fields: [orderId], references: [id])
   orderId        String?
   startedAt      DateTime  @default(now())
@@ -113,34 +195,42 @@ model AutomationLog {
   screenshotPath String?
 }
 
-// Una receta, propia o del recetario base ("seed"). Las tuyas y las que ya cocinaste se
-// priorizan sobre las del recetario base al recomendar qué cocinar con el inventario actual.
+// Una receta. userId nulo = receta del recetario base, compartida y visible para todos.
+// userId con valor = receta propia de ese usuario, visible solo para él. Las propias y las
+// que ya cocinó se priorizan sobre las del recetario base al recomendar qué cocinar.
 model Recipe {
   id           String   @id @default(cuid())
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String?
   name         String
   source       String   @default("user") // seed | user
   mealType     String? // desayuno | comida | cena | snack (sugerido, no obligatorio)
   servings     Int      @default(4) // porciones que rinden las cantidades de RecipeIngredient
   instructions String?
-  timesUsed    Int      @default(0) // veces marcada como "preparada" en el menú semanal
+  timesUsed    Int      @default(0) // veces marcada como "preparada" (todos los usuarios)
   createdAt    DateTime @default(now())
 
-  ingredients RecipeIngredient[]
+  ingredients     RecipeIngredient[]
   mealPlanEntries MealPlanEntry[]
 }
 
+// Los ingredientes se guardan por nombre (no por Product) porque una receta del recetario
+// base es compartida entre usuarios, y cada quien tiene sus propios Product por separado.
+// Al calcular recomendaciones se busca el Product del usuario actual por nombre.
 model RecipeIngredient {
-  id        String  @id @default(cuid())
-  recipe    Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  recipeId  String
-  product   Product @relation(fields: [productId], references: [id])
-  productId String
-  quantity  Float // cantidad de este producto para el número de porciones base de la receta
+  id       String @id @default(cuid())
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId String
+  name     String
+  unit     String @default("pza")
+  quantity Float // cantidad de este producto para el número de porciones base de la receta
 }
 
 // Una comida planeada en el menú semanal (desayuno/comida/cena/snack de un día concreto).
 model MealPlanEntry {
   id         String    @id @default(cuid())
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
   date       DateTime // solo importa el día (00:00 de esa fecha)
   mealType   String // desayuno | comida | cena | snack
   recipe     Recipe    @relation(fields: [recipeId], references: [id])

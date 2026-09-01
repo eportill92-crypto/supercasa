@@ -18,10 +18,11 @@ model Product {
   lacomerSku String?
   createdAt  DateTime @default(now())
 
-  pantryItem       PantryItem?
-  orderItems       OrderItem[]
-  usageEvents      UsageEvent[]
-  shoppingListItem ShoppingListItem[]
+  pantryItem        PantryItem?
+  orderItems        OrderItem[]
+  usageEvents       UsageEvent[]
+  shoppingListItem  ShoppingListItem[]
+  recipeIngredients RecipeIngredient[]
 }
 
 model PantryItem {
@@ -110,4 +111,41 @@ model AutomationLog {
   status         String    @default("running") // running | success | error
   message        String?
   screenshotPath String?
+}
+
+// Una receta, propia o del recetario base ("seed"). Las tuyas y las que ya cocinaste se
+// priorizan sobre las del recetario base al recomendar qué cocinar con el inventario actual.
+model Recipe {
+  id           String   @id @default(cuid())
+  name         String
+  source       String   @default("user") // seed | user
+  mealType     String? // desayuno | comida | cena | snack (sugerido, no obligatorio)
+  servings     Int      @default(4) // porciones que rinden las cantidades de RecipeIngredient
+  instructions String?
+  timesUsed    Int      @default(0) // veces marcada como "preparada" en el menú semanal
+  createdAt    DateTime @default(now())
+
+  ingredients RecipeIngredient[]
+  mealPlanEntries MealPlanEntry[]
+}
+
+model RecipeIngredient {
+  id        String  @id @default(cuid())
+  recipe    Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  recipeId  String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Float // cantidad de este producto para el número de porciones base de la receta
+}
+
+// Una comida planeada en el menú semanal (desayuno/comida/cena/snack de un día concreto).
+model MealPlanEntry {
+  id         String    @id @default(cuid())
+  date       DateTime // solo importa el día (00:00 de esa fecha)
+  mealType   String // desayuno | comida | cena | snack
+  recipe     Recipe    @relation(fields: [recipeId], references: [id])
+  recipeId   String
+  servings   Int       @default(4) // porciones reales para esta comida (escala los ingredientes)
+  prepared   Boolean   @default(false)
+  preparedAt DateTime?
 }

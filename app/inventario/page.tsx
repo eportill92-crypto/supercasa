@@ -7,9 +7,10 @@ import {
   useProduct,
   deletePantryItem,
 } from "@/lib/actions/pantry";
+import { computeDailyUsageRates, estimateDaysRemaining } from "@/lib/usage-estimate";
 
 export default async function InventarioPage() {
-  const items = await listPantry();
+  const [items, usageRates] = await Promise.all([listPantry(), computeDailyUsageRates()]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -29,6 +30,7 @@ export default async function InventarioPage() {
               <th className="px-4 py-3">Cantidad</th>
               <th className="px-4 py-3">Mínimo</th>
               <th className="px-4 py-3">Objetivo</th>
+              <th className="px-4 py-3">Duración estimada</th>
               <th className="px-4 py-3">Usar</th>
               <th className="px-4 py-3" />
             </tr>
@@ -107,6 +109,18 @@ export default async function InventarioPage() {
                       </button>
                     </form>
                   </td>
+                  <td className="px-4 py-3 text-xs text-zinc-500">
+                    {(() => {
+                      const days = estimateDaysRemaining(item.quantity, usageRates.get(item.productId));
+                      return days === null ? (
+                        <span className="text-zinc-300">Sin datos aún</span>
+                      ) : days <= 5 ? (
+                        <span className="font-medium text-red-600">~{days} días</span>
+                      ) : (
+                        <span>~{days} días</span>
+                      );
+                    })()}
+                  </td>
                   <td className="px-4 py-3">
                     <form action={useProduct} className="flex items-center gap-1">
                       <input type="hidden" name="productId" value={item.productId} />
@@ -141,7 +155,7 @@ export default async function InventarioPage() {
             })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-sm text-zinc-400">
+                <td colSpan={7} className="px-4 py-6 text-center text-sm text-zinc-400">
                   Aún no hay productos en el inventario.
                 </td>
               </tr>

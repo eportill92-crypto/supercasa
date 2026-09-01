@@ -23,6 +23,8 @@ const NAV_LINKS = [
   { href: "/inventario", label: "Inventario" },
   { href: "/lista-compra", label: "Lista de compra" },
   { href: "/pedidos", label: "Pedidos" },
+  { href: "/menu-semanal", label: "Menú semanal" },
+  { href: "/recetas", label: "Recetas" },
   { href: "/configuracion", label: "Configuración" },
 ];
 

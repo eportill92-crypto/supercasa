@@ -15,7 +15,14 @@
 // Los sitios grandes de e-commerce cambian su HTML seguido y algunos usan protección
 // anti-bot (Cloudflare, PerimeterX, etc.) que puede requerir ajustes adicionales.
 
-export const LACOMER_BASE_URL = "https://www.lacomer.com.mx";
+// El sitio necesita un identificador de sucursal/formato en la URL (succId/succFmt) — sin
+// esto, redirige a succId=0&succFmt=0 y el sitio responde con una página de error
+// ("LaComer-400-APP"). Normalmente el sitio lo recuerda por cookie/localStorage según tu
+// ubicación; en un navegador nuevo (como el que abre Playwright) no hay nada guardado.
+// TODO: esto es la sucursal de una sola cuenta de prueba — antes de usarlo con más usuarios,
+// hay que decidir cómo elegir la sucursal correcta para cada quien (¿desde su código postal
+// guardado en DeliveryAddress? ¿dejando que el flujo de login la seleccione solo?).
+export const LACOMER_BASE_URL = "https://www.lacomer.com.mx/lacomer/?succId=287&succFmt=100";
 
 export const selectors = {
   login: {

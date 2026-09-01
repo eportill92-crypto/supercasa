@@ -22,7 +22,7 @@
 // TODO: esto es la sucursal de una sola cuenta de prueba — antes de usarlo con más usuarios,
 // hay que decidir cómo elegir la sucursal correcta para cada quien (¿desde su código postal
 // guardado en DeliveryAddress? ¿dejando que el flujo de login la seleccione solo?).
-export const LACOMER_BASE_URL = "https://www.lacomer.com.mx/lacomer/?succId=287&succFmt=100";
+export const LACOMER_BASE_URL = "https://www.lacomer.com.mx/lacomer/#!/home?succId=287&succFmt=100";
 
 export const selectors = {
   login: {

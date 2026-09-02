@@ -64,8 +64,9 @@ export const selectors = {
   cart: {
     // Verificado (2026-09-02): <img id="carritoH" alt="Mi carrito"> en el header.
     cartIcon: "#carritoH",
-    // TODO: falta verificar contra el sitio real.
-    checkoutButton: "text=Proceder al pago",
+    // Verificado (2026-09-02): el carrito NO tiene un botón genérico "Proceder al pago" — al
+    // final hay dos botones, "Entrega a domicilio" / "Recoger en tienda". Usamos el primero.
+    checkoutButton: "text=Entrega a domicilio",
   },
   checkout: {
     addressStepConfirmButton: 'text=Confirmar dirección',

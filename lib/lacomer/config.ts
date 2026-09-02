@@ -95,6 +95,10 @@ export const selectors = {
     // <año>. De <hora inicio> a <hora fin> hrs. $<costo>." — se usa para avisarle al usuario
     // qué horario quedó reservado en el mensaje final del pedido.
     deliverySlotSummary: "text=Tu elección",
+    // Al avanzar de Horario a Pago puede aparecer un modal "¿Vas a dejar ir tus beneficios?"
+    // (promoción del Monedero Naranja, solo si la cuenta no lo tiene registrado) — se ignora
+    // con el botón <button id="btnContinuarMon" data-dismiss="modal">CONTINUAR</button>.
+    skipMonederoNaranjaPromptButton: "#btnContinuarMon",
     // TODO: pendiente verificar los pasos de Pago y confirmación final — placeholders sin
     // confirmar todavía.
     paymentMethodCashOnDelivery: "text=Pago contra entrega",

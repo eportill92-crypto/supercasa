@@ -161,6 +161,13 @@ async function checkout(
     .catch(() => undefined);
   await page.click(selectors.checkout.continueButton);
 
+  // Modal opcional "¿Vas a dejar ir tus beneficios?" (promoción de Monedero Naranja) — solo
+  // aparece si la cuenta no lo tiene registrado, así que se ignora si no sale a tiempo.
+  await page
+    .locator(selectors.checkout.skipMonederoNaranjaPromptButton)
+    .click({ timeout: 3_000 })
+    .catch(() => undefined);
+
   // Paso 4: Pago — contra entrega, nunca tarjeta.
   await page.click(selectors.checkout.paymentMethodCashOnDelivery);
   await page.click(selectors.checkout.continueButton);

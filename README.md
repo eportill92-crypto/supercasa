@@ -53,19 +53,22 @@ El robot de compra vive en `lib/lacomer/`:
 - `config.ts` — todos los selectores (botones, inputs, etc.) del sitio de La Comer.
 - `automate.ts` — el flujo: login → buscar/agregar cada producto → checkout con pago contra entrega.
 
-**Los selectores de `config.ts` son placeholders sin verificar.** Este proyecto se desarrolló en un entorno con el acceso de red a `lacomer.com.mx` bloqueado por política del sandbox, así que no fue posible abrir el sitio real durante el desarrollo para confirmar los `id`/`name`/textos exactos de cada botón y campo. Antes de usar la automatización en serio:
+**La mayoría de los selectores de `config.ts` ya están verificados contra el sitio real** (2026-09-02, sesión con un usuario real hasta el paso de confirmar). Queda un solo punto sin confirmar: `checkout.orderConfirmedIndicator` — qué aparece justo después de darle clic a "Confirmar pedido" — porque deliberadamente no se completó un pedido real solo para probar selectores. Antes de dejarlo correr desatendido:
 
-1. Corre `npm run lacomer:explore` **en tu propia computadora** (con internet normal). Abre el sitio real paso a paso y te guía para anotar los selectores correctos.
-2. Pega esos selectores en `lib/lacomer/config.ts`.
-3. Prueba primero con `LACOMER_HEADFUL=true` en `.env` para ver el navegador y confirmar cada paso a la vista, antes de dejarlo correr solo.
-4. Hay un modo simulación sin tocar la red ni abrir navegador: `LACOMER_DRY_RUN=true` en `.env`. Sirve para probar que el resto del flujo (guardar credenciales → botón "Pedir en La Comer" → se registra el pedido y se repone el inventario) funciona, mientras terminas de verificar los selectores reales.
+1. Corre un pedido con pocos artículos usando `LACOMER_HEADFUL=true` en `.env`, viendo el navegador, y confirma/ajusta ese último selector según lo que veas tras el "Confirmar pedido".
+2. Si algo del sitio cambió desde entonces, `npm run lacomer:explore` sigue sirviendo para reinspeccionar cualquier paso.
+3. Hay un modo simulación sin tocar la red ni abrir navegador: `LACOMER_DRY_RUN=true` en `.env`. Sirve para probar que el resto del flujo (guardar credenciales → botón "Pedir en La Comer" → se registra el pedido y se repone el inventario) funciona sin arriesgar un cargo real.
+
+### Requisito previo: guarda tu dirección directo en lacomer.com.mx
+
+El robot **no da de alta una dirección nueva por ti** — antes de activar el pedido automático (manual o programado), entra tú mismo a lacomer.com.mx, inicia sesión con la cuenta que vas a usar, y guarda ahí tu dirección de entrega al menos una vez. Es así a propósito: dar de alta una dirección nueva pide un **código de verificación por correo/SMS**, algo que un robot no puede leer. Una vez guardada, los pedidos siguientes ya la usan sin pedir nada más.
 
 ### Seguridad de las credenciales
 
 Tu correo y contraseña de La Comer se guardan **cifrados** (AES-256-GCM, clave `ENCRYPTION_KEY`) en la base de datos — nunca en texto plano. Aun así:
 
 - Quien tenga acceso al servidor y a `ENCRYPTION_KEY` puede descifrarlas — trata esta app como si fuera tan sensible como tu cuenta de La Comer misma. No la despliegues en un servidor compartido o público.
-- El pago está configurado para ser **contra entrega** (efectivo/tarjeta al recibir), nunca se guarda ni se usa una tarjeta de crédito/débito dentro de la automatización.
+- El pago está configurado para ser **contra entrega** (efectivo/tarjeta al recibir), nunca se guarda ni se usa una tarjeta de crédito/débito dentro de la automatización. En Configuración eliges con qué vas a pagar al repartidor (Efectivo, Visa/Mastercard o American Express) — el sitio lo pide para que traiga la máquina correcta, no para cobrarte ahí.
 - Revisa los [Términos y Condiciones de La Comer](https://www.lacomer.com.mx/) — automatizar compras con un bot puede no estar contemplado en el uso esperado del sitio. Es tu cuenta y tu decisión, pero conviene saberlo.
 
 ### Dónde corre el robot en producción — GitHub Actions

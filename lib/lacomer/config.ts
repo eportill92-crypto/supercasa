@@ -100,11 +100,18 @@ export const selectors = {
     // con el botón <button id="btnContinuarMon" data-dismiss="modal">CONTINUAR</button>.
     skipMonederoNaranjaPromptButton: "#btnContinuarMon",
     // Paso "Pago" (2026-09-02): dos tarjetas, "Contra entrega" y "En línea". Contra entrega es
-    // <div id="btn_circle_pcentrega" ng-click="checkoutData.pagoContraEntrega=true;
-    // checkoutData.pagoEnLinea=false; ...">. OJO: la opción "En línea" (btn_circle_penlinea)
-    // llama finalizarConfirmarPedido() directo en su propio ng-click, pero "Contra entrega" NO
-    // — solo marca el flag, así que sigue haciendo falta el botón "Continuar" del wizard.
-    paymentMethodCashOnDelivery: "#btn_circle_pcentrega",
+    // <div id="btn_circle_pcentrega" class="btn_circle_item" ng-click="checkoutData.
+    // pagoContraEntrega=true; checkoutData.pagoEnLinea=false; ...">. OJO: la opción "En línea"
+    // (btn_circle_penlinea) llama finalizarConfirmarPedido() directo en su propio ng-click, pero
+    // "Contra entrega" NO — solo marca el flag, así que sigue haciendo falta "Continuar".
+    paymentMethodCashOnDelivery: ".btn_circle_item#btn_circle_pcentrega",
+    // ⚠️ El sitio reutiliza EL MISMO id "btn_circle_pcentrega" en un segundo elemento (bug de
+    // su HTML): al marcar "Contra entrega" arriba, aparece una sub-sección
+    // (ui-view="contraentrega") con OTRO <div id="btn_circle_pcentrega" class="pago_select_ball"
+    // ng-click="resetFrmPago();sendCheckoutDataInsession();"> que también hay que hacer clic
+    // para confirmar. Se distinguen por su clase (btn_circle_item vs pago_select_ball), nunca
+    // usar el id solo.
+    confirmCashOnDeliverySelectionButton: ".pago_select_ball#btn_circle_pcentrega",
     // TODO: pendiente verificar el paso "Detalle" (confirmación final del pedido) — placeholders
     // sin confirmar todavía.
     placeOrderButton: "text=Confirmar pedido",

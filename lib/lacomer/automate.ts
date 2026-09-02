@@ -168,8 +168,10 @@ async function checkout(
     .click({ timeout: 3_000 })
     .catch(() => undefined);
 
-  // Paso 4: Pago — contra entrega, nunca tarjeta.
+  // Paso 4: Pago — contra entrega, nunca tarjeta. Son dos clics: el primero elige "Contra
+  // entrega" (vs "En línea"), lo que revela una sub-sección con un segundo botón a confirmar.
   await page.click(selectors.checkout.paymentMethodCashOnDelivery);
+  await page.click(selectors.checkout.confirmCashOnDeliverySelectionButton);
   await page.click(selectors.checkout.continueButton);
 
   // Paso 5: Detalle — confirmación final del pedido.

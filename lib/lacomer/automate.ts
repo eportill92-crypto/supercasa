@@ -105,7 +105,29 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
 // Guarda una captura de pantalla + el HTML de la página tal como quedó al fallar, en una
 // carpeta fija (lacomer-diagnostics/) dentro del checkout — para poder subirla como artefacto
 // de GitHub Actions y ver qué estaba viendo el robot quando algo no hizo match.
+//
+// El artefacto de GitHub Actions no se puede inspeccionar desde este entorno de desarrollo (el
+// proxy de red bloquea la descarga directa de Azure Blob Storage donde GitHub lo aloja), así que
+// además se imprime todo lo relevante directo al log del job (URL, título, primeros 3000
+// caracteres del texto visible) — eso sí es legible vía la API de logs de GitHub Actions.
 async function saveDiagnostics(page: Page, screenshotPaths: string[]) {
+  try {
+    const url = page.url();
+    const title = await page.title().catch(() => "(sin título)");
+    const bodyText = await page
+      .locator("body")
+      .innerText()
+      .then((t) => t.replace(/\s+/g, " ").trim().slice(0, 3000))
+      .catch(() => "(no se pudo leer el texto del body)");
+    console.error("--- DIAGNÓSTICO (falló esperando un selector) ---");
+    console.error(`URL actual: ${url}`);
+    console.error(`Título: ${title}`);
+    console.error(`Texto visible (primeros 3000 caracteres): ${bodyText}`);
+    console.error("--- FIN DIAGNÓSTICO ---");
+  } catch (err) {
+    console.error("No se pudo capturar diagnóstico de texto:", err);
+  }
+
   try {
     const fs = await import("fs/promises");
     const dir = "lacomer-diagnostics";

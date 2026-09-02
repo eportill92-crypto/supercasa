@@ -69,10 +69,16 @@ export const selectors = {
     checkoutButton: "text=Entrega a domicilio",
   },
   checkout: {
-    addressStepConfirmButton: 'text=Confirmar dirección',
-    paymentMethodCashOnDelivery: 'text=Pago contra entrega',
-    placeOrderButton: 'text=Confirmar pedido',
-    orderConfirmedIndicator: 'text=Pedido confirmado',
+    // Verificado (2026-09-02): el checkout real es un wizard de 5 pasos — Revisar pedido →
+    // Dirección → Horario → Pago → Detalle — con ESTE MISMO botón "Continuar" para avanzar en
+    // cada paso (no hay un botón único de "Confirmar pedido" al final de un solo paso).
+    continueButton: "#btnDesktopContinuar",
+    // TODO: pendiente verificar cada paso individual (selección de dirección guardada, horario
+    // de entrega, método de pago, confirmación final) — placeholders sin confirmar todavía.
+    addressStepConfirmButton: "text=Confirmar dirección",
+    paymentMethodCashOnDelivery: "text=Pago contra entrega",
+    placeOrderButton: "text=Confirmar pedido",
+    orderConfirmedIndicator: "text=Pedido confirmado",
   },
 };
 

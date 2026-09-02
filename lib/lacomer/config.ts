@@ -29,10 +29,17 @@ export const selectors = {
     // Verificado contra el sitio real (2026-09-02): enlace "Ingresa" en el header,
     // <a id="lnkLogin" href="#!/login">. Solo aparece cuando NO hay sesión (ng-if="clieId <= 0").
     openLoginButton: "#lnkLogin",
-    emailInput: 'input[type="email"], input[name="email"]',
-    passwordInput: 'input[type="password"], input[name="password"]',
-    submitButton: 'button[type="submit"]',
-    // Algo que solo aparece cuando ya iniciaste sesión (para confirmar login exitoso).
+    // El formulario de login vive dentro de un contenedor con id="login-form". Confirmado que
+    // el correo/contraseña son input[type=email]/input[type=password] normales ahí adentro.
+    emailInput: '#login-form input[type="email"]',
+    passwordInput: '#login-form input[type="password"]',
+    // El botón "Entrar" es un <a class="btn btn_orange" ...> (no un <button>), confirmado por
+    // las reglas CSS que le aplican (#login-form .btn_orange, #login-form .btn, #login-form a).
+    submitButton: "#login-form .btn_orange",
+    // TODO: falta verificar contra el sitio real. OJO: NO puede ser "#lnkLogin" — ese enlace
+    // solo aparece cuando NO hay sesión (ng-if="clieId <= 0" en el HTML real), así que
+    // esperarlo después de un login exitoso nunca haría match. Falta inspeccionar qué aparece
+    // en el header cuando SÍ hay sesión iniciada (ej. el nombre del cliente, "Mi cuenta", etc.).
     loggedInIndicator: 'text=Mi cuenta',
   },
   search: {

@@ -97,6 +97,10 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
 }
 
 async function login(page: Page, email: string, password: string) {
+  // Espera el botón con el timeout largo (navigation), no el de acción por default — el sitio
+  // es una SPA de Angular pesada (varios scripts de terceros) que puede tardar más en aparecer
+  // en un runner de CI más lento que en una computadora normal.
+  await page.waitForSelector(selectors.login.openLoginButton, { timeout: TIMEOUTS.navigation });
   await page.click(selectors.login.openLoginButton);
   await page.fill(selectors.login.emailInput, email);
   await page.fill(selectors.login.passwordInput, password);

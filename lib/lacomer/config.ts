@@ -131,6 +131,8 @@ export const selectors = {
 };
 
 export const TIMEOUTS = {
-  navigation: 30_000,
-  action: 15_000,
+  // Un runner de CI (GitHub Actions) puede ser más lento que una computadora normal para
+  // renderizar una SPA de Angular pesada con varios scripts de terceros — mejor generoso.
+  navigation: 45_000,
+  action: 20_000,
 };

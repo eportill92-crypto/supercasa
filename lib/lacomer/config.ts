@@ -46,14 +46,20 @@ export const selectors = {
   search: {
     // Placeholder real: "Busca uno o más productos, separándolos por coma".
     searchInput: 'input[placeholder*="Busca" i]',
-    resultCard: '[data-testid="product-card"], .product-card',
-    resultTitle: '.product-card__title, [data-testid="product-title"]',
-    resultAddToCartButton: 'button:has-text("Agregar")',
+    // Verificado (2026-09-02): cada tarjeta de resultado es un <li class="li_prod li_mosaic ...">.
+    resultCard: ".li_prod",
+    // Verificado (2026-09-02): tanto el campo de cantidad como el botón de agregar usan el
+    // código de barras del producto en su id (pediCant_{codigoBarras} / btn_addtoCart_{...}),
+    // así que se buscan por atributo/clase en vez del id exacto (variable por producto).
+    quantityInput: 'input[id^="pediCant_"]',
+    // <button ng-add-cart id="btn_addtoCart_{codigoBarras}" title="Agregar a carrito">.
+    resultAddToCartButton: "[ng-add-cart]",
   },
   product: {
     // Si navegamos directo a la URL guardada del producto (Product.lacomerUrl) en vez de buscar.
-    addToCartButton: 'button:has-text("Agregar al carrito")',
-    quantityInput: 'input[name="quantity"]',
+    // Mismo patrón que search: id="btn_addtoCart_{codigoBarras}" / id="pediCant_{codigoBarras}".
+    addToCartButton: "[ng-add-cart]",
+    quantityInput: 'input[id^="pediCant_"]',
   },
   cart: {
     cartIcon: '[aria-label="Carrito"], [data-testid="cart-icon"]',

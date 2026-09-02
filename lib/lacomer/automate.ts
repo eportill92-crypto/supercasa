@@ -110,6 +110,9 @@ async function addItemToCart(page: Page, item: OrderLineItem) {
   await page.keyboard.press("Enter");
   await page.waitForSelector(selectors.search.resultCard, { timeout: TIMEOUTS.navigation });
   const firstCard = page.locator(selectors.search.resultCard).first();
+  if (item.quantity !== 1) {
+    await firstCard.locator(selectors.search.quantityInput).fill(String(item.quantity));
+  }
   await firstCard.locator(selectors.search.resultAddToCartButton).click();
 }
 

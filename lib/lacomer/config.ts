@@ -117,9 +117,15 @@ export const selectors = {
       visa_mastercard: "#btn_circle_vismc",
       amex: "#btn_circle_amexs",
     },
-    // TODO: pendiente verificar el paso "Detalle" (confirmación final del pedido) — placeholders
-    // sin confirmar todavía.
-    placeOrderButton: "text=Confirmar pedido",
+    // Paso "Detalle" (2026-09-02): resumen final con 3 secciones (Entrega a domicilio, Forma
+    // de pago, Desglose de pago) y este botón, que sí es el que hace el pedido real —
+    // deliberadamente NO se completó un pedido real hoy para verificarlo, así que
+    // orderConfirmedIndicator (qué aparece después de confirmar) sigue sin confirmar.
+    placeOrderButton: "#confirmPaymentButton",
+    // TODO: sin verificar — no se le dio clic a "Confirmar pedido" a propósito, para no generar
+    // un cargo real solo por probar selectores. Antes de usarse en serio, correr un pedido real
+    // (o de bajo costo) con LACOMER_HEADFUL=true para ver qué aparece tras confirmar y ajustar
+    // esto — mientras tanto es el placeholder original sin verificar.
     orderConfirmedIndicator: "text=Pedido confirmado",
   },
 };

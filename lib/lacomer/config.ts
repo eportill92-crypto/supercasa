@@ -22,6 +22,9 @@
 // TODO: esto es la sucursal de una sola cuenta de prueba — antes de usarlo con más usuarios,
 // hay que decidir cómo elegir la sucursal correcta para cada quien (¿desde su código postal
 // guardado en DeliveryAddress? ¿dejando que el flujo de login la seleccione solo?).
+// Nota (2026-09-02): al iniciar sesión, el sitio redirige solo a la sucursal guardada en la
+// cuenta (ej. succId=14 "La Comer Lomas Anáhuac" en vez del succId=287 con el que arrancamos) —
+// así que este succId inicial probablemente solo importa antes de loguearse.
 export const LACOMER_BASE_URL = "https://www.lacomer.com.mx/lacomer/#!/home?succId=287&succFmt=100";
 
 export const selectors = {
@@ -36,14 +39,13 @@ export const selectors = {
     // El botón "Entrar" es un <a class="btn btn_orange" ...> (no un <button>), confirmado por
     // las reglas CSS que le aplican (#login-form .btn_orange, #login-form .btn, #login-form a).
     submitButton: "#login-form .btn_orange",
-    // TODO: falta verificar contra el sitio real. OJO: NO puede ser "#lnkLogin" — ese enlace
-    // solo aparece cuando NO hay sesión (ng-if="clieId <= 0" en el HTML real), así que
-    // esperarlo después de un login exitoso nunca haría match. Falta inspeccionar qué aparece
-    // en el header cuando SÍ hay sesión iniciada (ej. el nombre del cliente, "Mi cuenta", etc.).
-    loggedInIndicator: 'text=Mi cuenta',
+    // Verificado (2026-09-02): tras un login exitoso el header muestra "Hola: <nombre>" y
+    // "Mi cuenta ▾" en vez del enlace "Ingresa".
+    loggedInIndicator: "text=Mi cuenta",
   },
   search: {
-    searchInput: 'input[type="search"], input[placeholder*="Buscar" i]',
+    // Placeholder real: "Busca uno o más productos, separándolos por coma".
+    searchInput: 'input[placeholder*="Busca" i]',
     resultCard: '[data-testid="product-card"], .product-card',
     resultTitle: '.product-card__title, [data-testid="product-title"]',
     resultAddToCartButton: 'button:has-text("Agregar")',

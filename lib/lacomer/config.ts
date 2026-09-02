@@ -26,8 +26,9 @@ export const LACOMER_BASE_URL = "https://www.lacomer.com.mx/lacomer/#!/home?succ
 
 export const selectors = {
   login: {
-    // Botón/enlace en el header que abre el login (modal o página nueva).
-    openLoginButton: 'text=Iniciar sesión',
+    // Verificado contra el sitio real (2026-09-02): enlace "Ingresa" en el header,
+    // <a id="lnkLogin" href="#!/login">. Solo aparece cuando NO hay sesión (ng-if="clieId <= 0").
+    openLoginButton: "#lnkLogin",
     emailInput: 'input[type="email"], input[name="email"]',
     passwordInput: 'input[type="password"], input[name="password"]',
     submitButton: 'button[type="submit"]',

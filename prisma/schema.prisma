@@ -22,6 +22,7 @@ model User {
   passwordHash  String? // null si el usuario solo inició sesión con Google
   createdAt     DateTime  @default(now())
   autoOrderEnabled Boolean @default(false) // opt-in: si está activo, el robot programado (cron) lo incluye
+  preferredPaymentMethod String @default("efectivo") // efectivo | visa_mastercard | amex — para que el repartidor traiga la máquina correcta en pago contra entrega
 
   accounts Account[]
   sessions Session[]

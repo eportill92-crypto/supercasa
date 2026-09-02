@@ -8,13 +8,17 @@ import {
   getDefaultAddress,
   getAutoOrderEnabled,
   setAutoOrderEnabled,
+  getPreferredPaymentMethod,
+  setPreferredPaymentMethod,
 } from "@/lib/actions/settings";
+import { PAYMENT_METHODS } from "@/lib/payment-methods";
 
 export default async function ConfiguracionPage() {
-  const [{ configured }, address, autoOrderEnabled] = await Promise.all([
+  const [{ configured }, address, autoOrderEnabled, preferredPaymentMethod] = await Promise.all([
     hasLacomerCredentials(),
     getDefaultAddress(),
     getAutoOrderEnabled(),
+    getPreferredPaymentMethod(),
   ]);
 
   return (
@@ -79,6 +83,39 @@ export default async function ConfiguracionPage() {
               Guardar dirección
             </button>
           </div>
+        </form>
+      </section>
+
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-sun-text">
+          <span>💳</span> Método de pago contra entrega
+        </h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          El repartidor necesita saber con qué vas a pagar para traer la máquina correcta (o
+          nada, si es en efectivo). Nunca se guardan datos de tarjeta — solo eliges cuál usarás
+          al momento de la entrega.
+        </p>
+        <form action={setPreferredPaymentMethod} className="mt-4 flex flex-col gap-3">
+          <div className="flex flex-wrap gap-3">
+            {PAYMENT_METHODS.map((m) => (
+              <label
+                key={m.value}
+                className="flex items-center gap-2 rounded-2xl border-2 border-black/10 px-4 py-2.5 text-sm font-semibold has-[:checked]:border-sun has-[:checked]:bg-sun-light has-[:checked]:text-sun-text"
+              >
+                <input
+                  type="radio"
+                  name="preferredPaymentMethod"
+                  value={m.value}
+                  defaultChecked={preferredPaymentMethod === m.value}
+                  className="accent-sun"
+                />
+                {m.label}
+              </label>
+            ))}
+          </div>
+          <button type="submit" className="btn-primary self-start">
+            Guardar
+          </button>
         </form>
       </section>
 

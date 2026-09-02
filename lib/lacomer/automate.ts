@@ -1,5 +1,6 @@
 import { chromium, type Browser, type Page } from "playwright";
 import { LACOMER_BASE_URL, selectors, TIMEOUTS } from "./config";
+import type { PaymentMethod } from "@/lib/payment-methods";
 
 export type OrderLineItem = {
   productId: string;
@@ -36,6 +37,8 @@ export type RunOrderOptions = {
   password: string;
   items: OrderLineItem[];
   address: DeliveryAddressInput;
+  // Con qué pagar contra entrega (para que el repartidor traiga la máquina correcta).
+  paymentMethod: PaymentMethod;
   headful?: boolean;
   screenshotDir?: string;
   onStep?: (step: AutomationStep) => void | Promise<void>;
@@ -75,7 +78,7 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
     }
     await screenshot(page, opts.screenshotDir, "02-carrito", screenshotPaths, async () => {});
 
-    const { deliverySlotText } = await checkout(page, opts.address);
+    const { deliverySlotText } = await checkout(page, opts.address, opts.paymentMethod);
     await screenshot(page, opts.screenshotDir, "03-checkout", screenshotPaths, async () => {});
     await record({
       step: "checkout_pago_contra_entrega",
@@ -130,7 +133,8 @@ async function addItemToCart(page: Page, item: OrderLineItem) {
 // verificación por correo/SMS que un robot no puede leer).
 async function checkout(
   page: Page,
-  _address: DeliveryAddressInput
+  _address: DeliveryAddressInput,
+  paymentMethod: PaymentMethod
 ): Promise<{ deliverySlotText?: string }> {
   await page.click(selectors.cart.cartIcon);
   await page.click(selectors.cart.checkoutButton);
@@ -169,9 +173,11 @@ async function checkout(
     .catch(() => undefined);
 
   // Paso 4: Pago — contra entrega, nunca tarjeta. Son dos clics: el primero elige "Contra
-  // entrega" (vs "En línea"), lo que revela una sub-sección con un segundo botón a confirmar.
+  // entrega" (vs "En línea"), lo que revela una sub-sección donde se elige el instrumento
+  // específico (Efectivo / Visa-Mastercard / American Express) para que el repartidor traiga
+  // la máquina correcta.
   await page.click(selectors.checkout.paymentMethodCashOnDelivery);
-  await page.click(selectors.checkout.confirmCashOnDeliverySelectionButton);
+  await page.click(selectors.checkout.paymentInstrumentButtons[paymentMethod]);
   await page.click(selectors.checkout.continueButton);
 
   // Paso 5: Detalle — confirmación final del pedido.

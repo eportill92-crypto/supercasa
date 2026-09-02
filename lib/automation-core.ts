@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { decrypt } from "@/lib/crypto";
 import { registerOrderForUser } from "@/lib/orders-core";
 import type { OrderLineItem } from "@/lib/lacomer/automate";
+import { PAYMENT_METHODS, isPaymentMethod } from "@/lib/payment-methods";
 
 export type RunAutomationInput = {
   items: { productId: string; quantity: number }[];
@@ -50,11 +51,16 @@ export async function runLacomerOrderForUser(
       };
     }
 
-    const [credential, address, products] = await Promise.all([
+    const [credential, address, products, user] = await Promise.all([
       prisma.credential.findUnique({ where: { userId } }),
       prisma.deliveryAddress.findFirst({ where: { userId, isDefault: true } }),
       prisma.product.findMany({ where: { userId, id: { in: items.map((i) => i.productId) } } }),
+      prisma.user.findUnique({ where: { id: userId }, select: { preferredPaymentMethod: true } }),
     ]);
+    const rawPaymentMethod = user?.preferredPaymentMethod ?? "efectivo";
+    const paymentMethod = isPaymentMethod(rawPaymentMethod) ? rawPaymentMethod : "efectivo";
+    const paymentMethodLabel =
+      PAYMENT_METHODS.find((m) => m.value === paymentMethod)?.label ?? "Efectivo";
 
     if (!credential) {
       return {
@@ -107,6 +113,7 @@ export async function runLacomerOrderForUser(
       email,
       password,
       items: lineItems,
+      paymentMethod,
       address: {
         street: address.street,
         extNumber: address.extNumber,
@@ -130,7 +137,7 @@ export async function runLacomerOrderForUser(
       const notes = [
         dryRun ? "Pedido simulado (LACOMER_DRY_RUN=true)" : null,
         result.deliverySlotText,
-        "Pago: contra entrega (efectivo o tarjeta al recibir).",
+        `Pago contra entrega: ${paymentMethodLabel}.`,
       ]
         .filter(Boolean)
         .join(" — ");
@@ -142,7 +149,7 @@ export async function runLacomerOrderForUser(
       const successMessage =
         "Pedido completado con éxito." +
         (result.deliverySlotText ? ` ${result.deliverySlotText}` : "") +
-        " Pago contra entrega (efectivo o tarjeta al recibir).";
+        ` Pago contra entrega: ${paymentMethodLabel}.`;
       await prisma.automationLog.update({
         where: { id: log.id },
         data: {

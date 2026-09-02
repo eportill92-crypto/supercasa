@@ -105,13 +105,18 @@ export const selectors = {
     // (btn_circle_penlinea) llama finalizarConfirmarPedido() directo en su propio ng-click, pero
     // "Contra entrega" NO — solo marca el flag, así que sigue haciendo falta "Continuar".
     paymentMethodCashOnDelivery: ".btn_circle_item#btn_circle_pcentrega",
-    // ⚠️ El sitio reutiliza EL MISMO id "btn_circle_pcentrega" en un segundo elemento (bug de
-    // su HTML): al marcar "Contra entrega" arriba, aparece una sub-sección
-    // (ui-view="contraentrega") con OTRO <div id="btn_circle_pcentrega" class="pago_select_ball"
-    // ng-click="resetFrmPago();sendCheckoutDataInsession();"> que también hay que hacer clic
-    // para confirmar. Se distinguen por su clase (btn_circle_item vs pago_select_ball), nunca
-    // usar el id solo.
-    confirmCashOnDeliverySelectionButton: ".pago_select_ball#btn_circle_pcentrega",
+    // Al marcar "Contra entrega" arriba, aparece una sub-sección (ui-view="contraentrega") con
+    // 4 opciones para que el repartidor sepa qué máquina traer: "Contra Entrega" (genérico, ya
+    // viene activo por default, no hace falta tocarlo) y 3 específicas — Efectivo,
+    // Visa/Mastercard, American Express. Se elige la que el usuario tenga guardada como
+    // preferencia (User.preferredPaymentMethod). ⚠️ Ojo: el sitio reutiliza el id
+    // "btn_circle_pcentrega" también en la tarjeta genérica de arriba (bug de su HTML) — estos
+    // 3 ids de abajo son únicos, no hay ese problema aquí.
+    paymentInstrumentButtons: {
+      efectivo: "#btn_circle_efectivo",
+      visa_mastercard: "#btn_circle_vismc",
+      amex: "#btn_circle_amexs",
+    },
     // TODO: pendiente verificar el paso "Detalle" (confirmación final del pedido) — placeholders
     // sin confirmar todavía.
     placeOrderButton: "text=Confirmar pedido",

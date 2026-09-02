@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
 import { requireUserId } from "@/lib/session";
+import { isPaymentMethod, type PaymentMethod } from "@/lib/payment-methods";
 
 export async function saveLacomerCredentials(formData: FormData) {
   const userId = await requireUserId();
@@ -85,5 +86,25 @@ export async function setAutoOrderEnabled(formData: FormData) {
   const userId = await requireUserId();
   const enabled = formData.get("autoOrderEnabled") === "on";
   await prisma.user.update({ where: { id: userId }, data: { autoOrderEnabled: enabled } });
+  revalidatePath("/configuracion");
+}
+
+// Con qué pagar en el checkout de La Comer (Efectivo / Visa-Mastercard / American Express) —
+// el sitio le pide al repartidor traer la máquina correcta según esto, así que hace falta
+// saberlo de antemano para el pago contra entrega automático.
+export async function getPreferredPaymentMethod(): Promise<PaymentMethod> {
+  const userId = await requireUserId();
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { preferredPaymentMethod: true } });
+  const value = user?.preferredPaymentMethod ?? "efectivo";
+  return isPaymentMethod(value) ? value : "efectivo";
+}
+
+export async function setPreferredPaymentMethod(formData: FormData) {
+  const userId = await requireUserId();
+  const value = String(formData.get("preferredPaymentMethod") ?? "");
+  if (!isPaymentMethod(value)) {
+    throw new Error("Método de pago inválido");
+  }
+  await prisma.user.update({ where: { id: userId }, data: { preferredPaymentMethod: value } });
   revalidatePath("/configuracion");
 }

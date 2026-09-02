@@ -10,15 +10,19 @@ import {
   setAutoOrderEnabled,
   getPreferredPaymentMethod,
   setPreferredPaymentMethod,
+  getProfile,
+  updateProfileAction,
 } from "@/lib/actions/settings";
 import { PAYMENT_METHODS } from "@/lib/payment-methods";
+import ChangePasswordForm from "@/components/ChangePasswordForm";
 
 export default async function ConfiguracionPage() {
-  const [{ configured }, address, autoOrderEnabled, preferredPaymentMethod] = await Promise.all([
+  const [{ configured }, address, autoOrderEnabled, preferredPaymentMethod, profile] = await Promise.all([
     hasLacomerCredentials(),
     getDefaultAddress(),
     getAutoOrderEnabled(),
     getPreferredPaymentMethod(),
+    getProfile(),
   ]);
 
   return (
@@ -26,9 +30,40 @@ export default async function ConfiguracionPage() {
       <div>
         <h1 className="text-3xl font-extrabold">⚙️ Configuración</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Credenciales de La Comer y dirección de entrega para el pedido automático.
+          Tu perfil, contraseña, credenciales de La Comer y dirección de entrega.
         </p>
       </div>
+
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-ink">
+          <span>👤</span> Mi perfil
+        </h2>
+        <form action={updateProfileAction} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input name="name" defaultValue={profile.name ?? ""} placeholder="Tu nombre" className="input" />
+          <input value={profile.email} disabled readOnly className="input bg-black/5 text-ink-soft" />
+          <p className="text-xs text-ink-soft sm:col-span-2">
+            El correo es tu identificador de inicio de sesión y no se puede cambiar aquí. Miembro
+            desde {new Date(profile.createdAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}.
+          </p>
+          <div className="sm:col-span-2">
+            <button type="submit" className="btn-primary">
+              Guardar nombre
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-ink">
+          <span>🔒</span> Contraseña
+        </h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          {profile.hasPassword
+            ? "Cambia la contraseña con la que entras usando tu correo."
+            : "Tu cuenta solo inicia sesión con Google todavía. Crea una contraseña si también quieres poder entrar con correo y contraseña."}
+        </p>
+        <ChangePasswordForm hasPassword={profile.hasPassword} />
+      </section>
 
       <section className="card">
         <h2 className="flex items-center gap-2 font-bold text-brand-text">

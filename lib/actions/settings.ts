@@ -1,10 +1,69 @@
 "use server";
 
+import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { encrypt } from "@/lib/crypto";
 import { requireUserId } from "@/lib/session";
 import { isPaymentMethod, type PaymentMethod } from "@/lib/payment-methods";
+
+export async function getProfile() {
+  const userId = await requireUserId();
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true, passwordHash: true, createdAt: true },
+  });
+  if (!user) throw new Error("Usuario no encontrado");
+  return {
+    name: user.name,
+    email: user.email,
+    hasPassword: !!user.passwordHash,
+    createdAt: user.createdAt,
+  };
+}
+
+export async function updateProfileAction(formData: FormData) {
+  const userId = await requireUserId();
+  const name = String(formData.get("name") ?? "").trim();
+  await prisma.user.update({ where: { id: userId }, data: { name: name || null } });
+  revalidatePath("/configuracion");
+}
+
+export type ChangePasswordResult = { error: string } | { success: string };
+
+// Si el usuario ya tiene contraseña (login por correo/contraseña), hay que confirmar la actual
+// antes de cambiarla. Si no tiene (entró siempre con Google), se le permite crear una primera
+// contraseña sin pedir "la actual" — así puede además entrar por correo/contraseña si quiere.
+export async function changePasswordAction(formData: FormData): Promise<ChangePasswordResult> {
+  const userId = await requireUserId();
+  const currentPassword = String(formData.get("currentPassword") ?? "");
+  const newPassword = String(formData.get("newPassword") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
+
+  if (newPassword.length < 8) {
+    return { error: "La nueva contraseña debe tener al menos 8 caracteres" };
+  }
+  if (newPassword !== confirmPassword) {
+    return { error: "Las contraseñas nuevas no coinciden" };
+  }
+
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { passwordHash: true } });
+  if (user?.passwordHash) {
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) {
+      return { error: "Tu contraseña actual no es correcta" };
+    }
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+  revalidatePath("/configuracion");
+  return {
+    success: user?.passwordHash
+      ? "Contraseña actualizada."
+      : "Contraseña creada — ya puedes iniciar sesión con tu correo y esta contraseña, además de Google.",
+  };
+}
 
 export async function saveLacomerCredentials(formData: FormData) {
   const userId = await requireUserId();

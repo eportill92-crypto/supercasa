@@ -73,8 +73,14 @@ export const selectors = {
     // Dirección → Horario → Pago → Detalle — con ESTE MISMO botón "Continuar" para avanzar en
     // cada paso (no hay un botón único de "Confirmar pedido" al final de un solo paso).
     continueButton: "#btnDesktopContinuar",
-    // TODO: pendiente verificar cada paso individual (selección de dirección guardada, horario
-    // de entrega, método de pago, confirmación final) — placeholders sin confirmar todavía.
+    // Paso "Dirección" (2026-09-02): la dirección guardada aparece ya seleccionada; solo hay
+    // que responder "¿Deseas recibir llamada de consulta?" — se responde "NO" para no depender
+    // de que alguien conteste una llamada. Botón real: <button class="button__encuesta"
+    // ng-click="checkoutData.mostrarCheckRadio = 'OK'">NO</button> (el nombre del ng-click es
+    // engañoso, pero el texto visible "NO" es confiable).
+    declineConsultationCallButton: 'button.button__encuesta:has-text("NO")',
+    // TODO: pendiente verificar el resto de los pasos (Horario, Pago, Detalle/confirmación
+    // final) — placeholders sin confirmar todavía.
     addressStepConfirmButton: "text=Confirmar dirección",
     paymentMethodCashOnDelivery: "text=Pago contra entrega",
     placeOrderButton: "text=Confirmar pedido",

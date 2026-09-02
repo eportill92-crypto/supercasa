@@ -71,15 +71,44 @@ Tu correo y contraseña de La Comer se guardan **cifrados** (AES-256-GCM, clave 
 - El pago está configurado para ser **contra entrega** (efectivo/tarjeta al recibir), nunca se guarda ni se usa una tarjeta de crédito/débito dentro de la automatización. En Configuración eliges con qué vas a pagar al repartidor (Efectivo, Visa/Mastercard o American Express) — el sitio lo pide para que traiga la máquina correcta, no para cobrarte ahí.
 - Revisa los [Términos y Condiciones de La Comer](https://www.lacomer.com.mx/) — automatizar compras con un bot puede no estar contemplado en el uso esperado del sitio. Es tu cuenta y tu decisión, pero conviene saberlo.
 
-### Dónde corre el robot en producción — GitHub Actions
+### Dónde corre el robot en producción — GitHub Actions con runner autohospedado
 
 Playwright necesita un proceso con navegador real, que puede tardar más de lo que permite una función serverless típica de Vercel. Por eso el robot vive en un **GitHub Action** (`.github/workflows/lacomer-order.yml`), no en Vercel:
 
-- **Botón manual** ("Pedir en La Comer" en la app): en Vercel, ese botón no abre un navegador ahí mismo — llama a la API de GitHub para disparar el workflow (`workflow_dispatch`) pasándole tu `userId`. El workflow corre en un runner de GitHub, hace el pedido, y guarda el resultado (pedido + inventario repuesto, o el error) directo en la misma base de datos. Tarda unos minutos; mientras tanto lo ves como "en proceso" en Pedidos.
+- **Botón manual** ("Pedir en La Comer" en la app): en Vercel, ese botón no abre un navegador ahí mismo — llama a la API de GitHub para disparar el workflow (`workflow_dispatch`) pasándole tu `userId`. El workflow corre, hace el pedido, y guarda el resultado (pedido + inventario repuesto, o el error) directo en la misma base de datos. Tarda unos minutos; mientras tanto lo ves como "en proceso" en Pedidos.
 - **Programado**: el workflow también corre solo, todos los días (`schedule` en el YAML), y pide para cada usuario que activó "Pedido automático programado" en Configuración.
 - **Correrlo tú mismo**: también puedes ir a la pestaña *Actions* del repo en GitHub y correr "Robot de pedido La Comer" a mano (con o sin `userId`), o correr `npm run lacomer:order` localmente/en tu propio servidor.
 
-#### 1. Secrets del repositorio (para que el workflow pueda correr)
+#### ⚠️ Por qué es un runner autohospedado (self-hosted) y no un runner de nube de GitHub
+
+lacomer.com.mx está protegido por **Cloudflare**, y bloquea por completo las IPs de datacenter de los runners de nube de GitHub Actions (`ubuntu-latest`) — el sitio responde con una página "Sorry, you have been blocked" en vez del sitio real, confirmado inspeccionando el HTML que devolvía en una corrida real (2026-09-02). Una IP residencial normal (la de tu casa, tu celular) no tiene ese problema — por eso el flujo funcionaba siempre al probarlo desde tu propia computadora, pero nunca desde GitHub Actions.
+
+La solución es que el workflow corra desde una **computadora tuya** (dada de alta como "self-hosted runner" de GitHub), no desde la nube de GitHub. El workflow (`runs-on: [self-hosted, macOS]`) ya está configurado para eso.
+
+**Importante — esto no es "un runner por cliente".** Es una sola pieza de infraestructura tuya (como operador de la plataforma) que procesa los pedidos de **todos** los usuarios — tanto el botón manual de cualquiera como el lote programado diario de todos los que lo activaron. Mientras esa computadora esté encendida y conectada, todo funciona igual que antes; si está apagada, dormida, o el servicio no está corriendo, **ningún** pedido (de nadie) se procesa en ese momento. Para probar está bien usar tu Mac de uso diario; antes de tener clientes reales conviene moverlo a un equipo dedicado que se quede siempre encendido (una Mac mini, mini-PC, etc.) — mismos pasos de abajo, solo que en esa otra máquina.
+
+#### 1. Dar de alta el runner autohospedado en tu Mac
+
+1. En GitHub: **Settings del repo → Actions → Runners → New self-hosted runner**, elige **macOS** (y la arquitectura de tu Mac: Apple Silicon = ARM64, Intel = x64).
+2. Sigue los comandos exactos que te muestra esa pantalla (cambian con cada versión del runner), algo como:
+   ```bash
+   mkdir actions-runner && cd actions-runner
+   curl -o actions-runner-osx-....tar.gz -L https://github.com/actions/runner/releases/download/....tar.gz
+   tar xzf ./actions-runner-osx-....tar.gz
+   ./config.sh --url https://github.com/eportill92-crypto/supercasa --token TU_TOKEN_TEMPORAL
+   ```
+   El `config.sh` te pregunta un nombre para el runner y labels adicionales — puedes dejar los defaults (ya incluye `self-hosted`, `macOS` y la arquitectura, que es lo que pide el workflow).
+3. Para que corra en segundo plano y sobreviva reinicios (en vez de tener que dejar una terminal abierta con `./run.sh`), instálalo como servicio:
+   ```bash
+   ./svc.sh install
+   ./svc.sh start
+   ```
+4. Verifica en GitHub (**Settings → Actions → Runners**) que aparezca como **Idle** (verde) — significa que ya está listo para recibir jobs.
+5. En **Configuración del Sistema → Batería/Energía**, evita que la Mac se duerma sola (o al menos durante la hora del pedido programado, 07:00 CDMX) — un Mac dormido no puede correr el runner. Cerrar la tapa de un laptop cuenta como dormir; conéctala a corriente y ajusta que no se duerma con la tapa cerrada, o déjala abierta.
+
+No necesitas instalar nada de `DATABASE_URL`/`ENCRYPTION_KEY` a mano en esa Mac — GitHub se los manda cifrados al runner en cada job, igual que antes (ver el siguiente paso).
+
+#### 2. Secrets del repositorio (para que el workflow pueda correr)
 
 En GitHub: **Settings → Secrets and variables → Actions → New repository secret**. Agrega:
 
@@ -88,7 +117,7 @@ En GitHub: **Settings → Secrets and variables → Actions → New repository s
 | `DATABASE_URL` | La misma cadena de conexión de Postgres que usa Vercel (`POSTGRES_PRISMA_URL` de Supabase/Neon) |
 | `ENCRYPTION_KEY` | La misma clave que usa Vercel — necesita ser idéntica para poder descifrar las credenciales guardadas |
 
-#### 2. Que la app pueda disparar el workflow (botón manual)
+#### 3. Que la app pueda disparar el workflow (botón manual)
 
 Necesitas un **Personal Access Token** de GitHub con permiso para disparar workflows de este repo:
 
@@ -107,7 +136,7 @@ Luego, en Vercel (**Project → Settings → Environment Variables**), agrega:
 
 Redeploy después de agregarlas. Sin esto configurado, el botón sigue funcionando pero solo te avisa que el robot no está configurado todavía — nada se rompe.
 
-#### 3. Antes de dejarlo correr con dinero real
+#### 4. Antes de dejarlo correr con dinero real
 
 El workflow acepta un input `dryRun` (desde la pestaña Actions, o pasa `LACOMER_DRY_RUN=true` localmente) que simula todo el flujo sin abrir el sitio real — úsalo para probar que pedido → inventario → historial funcionan de punta a punta mientras terminas de verificar los selectores reales de `lib/lacomer/config.ts` (ver sección de arriba, "Sobre la automatización de La Comer").
 

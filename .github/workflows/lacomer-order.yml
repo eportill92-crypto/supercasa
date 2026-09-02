@@ -8,6 +8,14 @@ name: Robot de pedido La Comer
 #  2. Manual / por click ("workflow_dispatch"): corre para un solo usuario. Lo dispara la app
 #     web (botón "Pedir en La Comer") vía la API de GitHub, pasando el userId de quien lo pidió;
 #     también se puede correr a mano desde la pestaña Actions de este repo.
+#
+# ⚠️ IMPORTANTE (2026-09-02): este job corre en un runner AUTOHOSPEDADO (self-hosted), no en el
+# runner de nube de GitHub (ubuntu-latest) que se usaba antes. lacomer.com.mx usa Cloudflare, que
+# bloquea por completo (página "Sorry, you have been blocked") las IPs de datacenter de los
+# runners de GitHub Actions en la nube — confirmado viendo el HTML real que devolvía Cloudflare
+# en vez del sitio. Una IP residencial normal (como la de tu casa/celular) no tiene ese problema.
+# Ver la sección "Dónde corre el robot en producción" en el README para cómo dar de alta el
+# runner autohospedado en tu propia Mac.
 on:
   schedule:
     # 13:00 UTC = 07:00 CDMX en horario estándar (UTC-6) / 08:00 en horario de verano (UTC-5).
@@ -29,7 +37,9 @@ permissions:
 
 jobs:
   pedido:
-    runs-on: ubuntu-latest
+    # Tu propia Mac, dada de alta como runner autohospedado (ver README) — no un runner de nube
+    # de GitHub, para evitar el bloqueo de Cloudflare a IPs de datacenter.
+    runs-on: [self-hosted, macOS]
     timeout-minutes: 30
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
@@ -47,8 +57,10 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
+      # Sin --with-deps: esa bandera solo instala paquetes de sistema vía apt-get (Linux/Debian),
+      # no aplica en macOS — ahí el navegador que descarga Playwright ya viene autocontenido.
       - name: Instalar navegador de Playwright
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
 
       - name: Correr el robot de pedido
         run: npm run lacomer:order

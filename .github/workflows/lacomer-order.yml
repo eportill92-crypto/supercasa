@@ -52,3 +52,12 @@ jobs:
 
       - name: Correr el robot de pedido
         run: npm run lacomer:order
+
+      - name: Subir captura/HTML de diagnóstico si falló
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lacomer-diagnostics
+          path: lacomer-diagnostics/
+          retention-days: 7
+          if-no-files-found: ignore

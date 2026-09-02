@@ -57,29 +57,32 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
     await opts.onStep?.(step);
   };
 
+  let page: Page | undefined;
+
   try {
     browser = await chromium.launch({ headless: !opts.headful });
-    const page = await browser.newPage();
-    page.setDefaultTimeout(TIMEOUTS.action);
-    page.setDefaultNavigationTimeout(TIMEOUTS.navigation);
+    page = await browser.newPage();
+    const p = page;
+    p.setDefaultTimeout(TIMEOUTS.action);
+    p.setDefaultNavigationTimeout(TIMEOUTS.navigation);
 
-    await screenshot(page, opts.screenshotDir, "00-home", screenshotPaths, async () => {
-      await page.goto(LACOMER_BASE_URL, { waitUntil: "domcontentloaded" });
+    await screenshot(p, opts.screenshotDir, "00-home", screenshotPaths, async () => {
+      await p.goto(LACOMER_BASE_URL, { waitUntil: "domcontentloaded" });
     });
     await record({ step: "abrir_sitio", ok: true });
 
-    await login(page, opts.email, opts.password);
-    await screenshot(page, opts.screenshotDir, "01-login", screenshotPaths, async () => {});
+    await login(p, opts.email, opts.password);
+    await screenshot(p, opts.screenshotDir, "01-login", screenshotPaths, async () => {});
     await record({ step: "login", ok: true });
 
     for (const item of opts.items) {
-      await addItemToCart(page, item);
+      await addItemToCart(p, item);
       await record({ step: `agregar_carrito:${item.name}`, ok: true });
     }
-    await screenshot(page, opts.screenshotDir, "02-carrito", screenshotPaths, async () => {});
+    await screenshot(p, opts.screenshotDir, "02-carrito", screenshotPaths, async () => {});
 
-    const { deliverySlotText } = await checkout(page, opts.address, opts.paymentMethod);
-    await screenshot(page, opts.screenshotDir, "03-checkout", screenshotPaths, async () => {});
+    const { deliverySlotText } = await checkout(p, opts.address, opts.paymentMethod);
+    await screenshot(p, opts.screenshotDir, "03-checkout", screenshotPaths, async () => {});
     await record({
       step: "checkout_pago_contra_entrega",
       ok: true,
@@ -90,9 +93,31 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await record({ step: "error", ok: false, detail: message });
+    if (page) {
+      await saveDiagnostics(page, screenshotPaths);
+    }
     return { success: false, steps, screenshotPaths, errorMessage: message };
   } finally {
     await browser?.close();
+  }
+}
+
+// Guarda una captura de pantalla + el HTML de la página tal como quedó al fallar, en una
+// carpeta fija (lacomer-diagnostics/) dentro del checkout — para poder subirla como artefacto
+// de GitHub Actions y ver qué estaba viendo el robot quando algo no hizo match.
+async function saveDiagnostics(page: Page, screenshotPaths: string[]) {
+  try {
+    const fs = await import("fs/promises");
+    const dir = "lacomer-diagnostics";
+    await fs.mkdir(dir, { recursive: true });
+    const screenshotPath = `${dir}/error.png`;
+    const htmlPath = `${dir}/error.html`;
+    await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => undefined);
+    const html = await page.content().catch(() => null);
+    if (html) await fs.writeFile(htmlPath, html);
+    screenshotPaths.push(screenshotPath);
+  } catch {
+    // Si ni esto funciona (ej. la página ya se cerró), no hay nada más que hacer.
   }
 }
 

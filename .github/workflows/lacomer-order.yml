@@ -10,12 +10,17 @@ name: Robot de pedido La Comer
 #     también se puede correr a mano desde la pestaña Actions de este repo.
 #
 # ⚠️ IMPORTANTE (2026-09-02): este job corre en un runner AUTOHOSPEDADO (self-hosted), no en el
-# runner de nube de GitHub (ubuntu-latest) que se usaba antes. lacomer.com.mx usa Cloudflare, que
-# bloquea por completo (página "Sorry, you have been blocked") las IPs de datacenter de los
-# runners de GitHub Actions en la nube — confirmado viendo el HTML real que devolvía Cloudflare
-# en vez del sitio. Una IP residencial normal (como la de tu casa/celular) no tiene ese problema.
-# Ver la sección "Dónde corre el robot en producción" en el README para cómo dar de alta el
-# runner autohospedado en tu propia Mac.
+# runner de nube de GitHub (ubuntu-latest) que se usaba antes. lacomer.com.mx usa Cloudflare. Ver
+# la sección "Dónde corre el robot en producción" en el README para cómo dar de alta el runner
+# autohospedado en tu propia Mac.
+#
+# Cloudflare bloqueaba (página "Sorry, you have been blocked") incluso ya corriendo desde la
+# propia Mac con IP residencial — confirmado viendo el HTML real que devolvía en vez del sitio.
+# No era la IP: era el fingerprint del navegador automatizado (Playwright/Chromium headless), y
+# el bloqueo pasaba en la carga inicial del sitio, antes de siquiera intentar el login. Por eso
+# LACOMER_HEADFUL=true aquí abajo — corre con el navegador visible (posible porque el runner vive
+# en la sesión gráfica de tu Mac, algo que el runner de nube nunca tuvo) en vez de headless, que
+# suele ser suficiente para pasar el challenge de Cloudflare.
 on:
   schedule:
     # 13:00 UTC = 07:00 CDMX en horario estándar (UTC-6) / 08:00 en horario de verano (UTC-5).
@@ -46,6 +51,7 @@ jobs:
       ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
       LACOMER_DRY_RUN: ${{ github.event.inputs.dryRun == 'true' && 'true' || 'false' }}
       TARGET_USER_ID: ${{ github.event.inputs.userId }}
+      LACOMER_HEADFUL: "true"
     steps:
       - uses: actions/checkout@v4
 

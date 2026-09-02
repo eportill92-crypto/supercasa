@@ -60,7 +60,14 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
   let page: Page | undefined;
 
   try {
-    browser = await chromium.launch({ headless: !opts.headful });
+    // --disable-blink-features=AutomationControlled oculta la señal más obvia de que el
+    // navegador es controlado por automatización (navigator.webdriver) — Cloudflare bloqueaba
+    // la carga inicial del sitio incluso desde una IP residencial normal (nuestra propia Mac),
+    // así que el problema era el fingerprint del navegador, no la IP.
+    browser = await chromium.launch({
+      headless: !opts.headful,
+      args: ["--disable-blink-features=AutomationControlled"],
+    });
     page = await browser.newPage();
     const p = page;
     p.setDefaultTimeout(TIMEOUTS.action);

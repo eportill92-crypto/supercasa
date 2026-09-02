@@ -99,9 +99,14 @@ export const selectors = {
     // (promoción del Monedero Naranja, solo si la cuenta no lo tiene registrado) — se ignora
     // con el botón <button id="btnContinuarMon" data-dismiss="modal">CONTINUAR</button>.
     skipMonederoNaranjaPromptButton: "#btnContinuarMon",
-    // TODO: pendiente verificar los pasos de Pago y confirmación final — placeholders sin
-    // confirmar todavía.
-    paymentMethodCashOnDelivery: "text=Pago contra entrega",
+    // Paso "Pago" (2026-09-02): dos tarjetas, "Contra entrega" y "En línea". Contra entrega es
+    // <div id="btn_circle_pcentrega" ng-click="checkoutData.pagoContraEntrega=true;
+    // checkoutData.pagoEnLinea=false; ...">. OJO: la opción "En línea" (btn_circle_penlinea)
+    // llama finalizarConfirmarPedido() directo en su propio ng-click, pero "Contra entrega" NO
+    // — solo marca el flag, así que sigue haciendo falta el botón "Continuar" del wizard.
+    paymentMethodCashOnDelivery: "#btn_circle_pcentrega",
+    // TODO: pendiente verificar el paso "Detalle" (confirmación final del pedido) — placeholders
+    // sin confirmar todavía.
     placeOrderButton: "text=Confirmar pedido",
     orderConfirmedIndicator: "text=Pedido confirmado",
   },

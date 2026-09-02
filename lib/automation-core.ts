@@ -127,7 +127,11 @@ export async function runLacomerOrderForUser(
     });
 
     if (result.success) {
-      const notes = [dryRun ? "Pedido simulado (LACOMER_DRY_RUN=true)" : null, result.deliverySlotText]
+      const notes = [
+        dryRun ? "Pedido simulado (LACOMER_DRY_RUN=true)" : null,
+        result.deliverySlotText,
+        "Pago: contra entrega (efectivo o tarjeta al recibir).",
+      ]
         .filter(Boolean)
         .join(" — ");
       const order = await registerOrderForUser(userId, {
@@ -136,7 +140,9 @@ export async function runLacomerOrderForUser(
         notes: notes || undefined,
       });
       const successMessage =
-        "Pedido completado con éxito." + (result.deliverySlotText ? ` ${result.deliverySlotText}` : "");
+        "Pedido completado con éxito." +
+        (result.deliverySlotText ? ` ${result.deliverySlotText}` : "") +
+        " Pago contra entrega (efectivo o tarjeta al recibir).";
       await prisma.automationLog.update({
         where: { id: log.id },
         data: {

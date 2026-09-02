@@ -35,34 +35,60 @@ export default async function ConfiguracionPage() {
       </div>
 
       <section className="card">
-        <h2 className="flex items-center gap-2 font-bold text-ink">
-          <span>👤</span> Mi perfil
+        <h2 className="flex items-center gap-2 font-bold text-sun-text">
+          <span>💳</span> Método de pago contra entrega
         </h2>
-        <form action={updateProfileAction} className="mt-4 grid gap-3 sm:grid-cols-2">
-          <input name="name" defaultValue={profile.name ?? ""} placeholder="Tu nombre" className="input" />
-          <input value={profile.email} disabled readOnly className="input bg-black/5 text-ink-soft" />
-          <p className="text-xs text-ink-soft sm:col-span-2">
-            El correo es tu identificador de inicio de sesión y no se puede cambiar aquí. Miembro
-            desde {new Date(profile.createdAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}.
-          </p>
-          <div className="sm:col-span-2">
-            <button type="submit" className="btn-primary">
-              Guardar nombre
-            </button>
+        <p className="mt-1 text-sm text-ink-soft">
+          El repartidor necesita saber con qué vas a pagar para traer la máquina correcta (o
+          nada, si es en efectivo). Nunca se guardan datos de tarjeta — solo eliges cuál usarás
+          al momento de la entrega.
+        </p>
+        <form action={setPreferredPaymentMethod} className="mt-4 flex flex-col gap-3">
+          <div className="flex flex-wrap gap-3">
+            {PAYMENT_METHODS.map((m) => (
+              <label
+                key={m.value}
+                className="flex items-center gap-2 rounded-2xl border-2 border-black/10 px-4 py-2.5 text-sm font-semibold has-[:checked]:border-sun has-[:checked]:bg-sun-light has-[:checked]:text-sun-text"
+              >
+                <input
+                  type="radio"
+                  name="preferredPaymentMethod"
+                  value={m.value}
+                  defaultChecked={preferredPaymentMethod === m.value}
+                  className="accent-sun"
+                />
+                {m.label}
+              </label>
+            ))}
           </div>
+          <button type="submit" className="btn-primary self-start">
+            Guardar
+          </button>
         </form>
       </section>
 
       <section className="card">
-        <h2 className="flex items-center gap-2 font-bold text-ink">
-          <span>🔒</span> Contraseña
+        <h2 className="flex items-center gap-2 font-bold text-mint-text">
+          <span>📍</span> Dirección de entrega
         </h2>
         <p className="mt-1 text-sm text-ink-soft">
-          {profile.hasPassword
-            ? "Cambia la contraseña con la que entras usando tu correo."
-            : "Tu cuenta solo inicia sesión con Google todavía. Crea una contraseña si también quieres poder entrar con correo y contraseña."}
+          Se usa para llenar el checkout automáticamente y para pedir pago contra entrega.
         </p>
-        <ChangePasswordForm hasPassword={profile.hasPassword} />
+        <form action={saveDeliveryAddress} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input name="street" required defaultValue={address?.street} placeholder="Calle" className="input sm:col-span-2" />
+          <input name="extNumber" defaultValue={address?.extNumber ?? ""} placeholder="Número exterior" className="input" />
+          <input name="intNumber" defaultValue={address?.intNumber ?? ""} placeholder="Número interior (opcional)" className="input" />
+          <input name="neighborhood" defaultValue={address?.neighborhood ?? ""} placeholder="Colonia" className="input sm:col-span-2" />
+          <input name="city" required defaultValue={address?.city} placeholder="Ciudad / Alcaldía" className="input" />
+          <input name="state" required defaultValue={address?.state} placeholder="Estado" className="input" />
+          <input name="zip" required defaultValue={address?.zip} placeholder="Código postal" className="input" />
+          <input name="phone" defaultValue={address?.phone ?? ""} placeholder="Teléfono de contacto" className="input" />
+          <div className="sm:col-span-2">
+            <button type="submit" className="btn-primary">
+              Guardar dirección
+            </button>
+          </div>
+        </form>
       </section>
 
       <section className="card">
@@ -98,63 +124,6 @@ export default async function ConfiguracionPage() {
       </section>
 
       <section className="card">
-        <h2 className="flex items-center gap-2 font-bold text-mint-text">
-          <span>📍</span> Dirección de entrega
-        </h2>
-        <p className="mt-1 text-sm text-ink-soft">
-          Se usa para llenar el checkout automáticamente y para pedir pago contra entrega.
-        </p>
-        <form action={saveDeliveryAddress} className="mt-4 grid gap-3 sm:grid-cols-2">
-          <input name="street" required defaultValue={address?.street} placeholder="Calle" className="input sm:col-span-2" />
-          <input name="extNumber" defaultValue={address?.extNumber ?? ""} placeholder="Número exterior" className="input" />
-          <input name="intNumber" defaultValue={address?.intNumber ?? ""} placeholder="Número interior (opcional)" className="input" />
-          <input name="neighborhood" defaultValue={address?.neighborhood ?? ""} placeholder="Colonia" className="input sm:col-span-2" />
-          <input name="city" required defaultValue={address?.city} placeholder="Ciudad / Alcaldía" className="input" />
-          <input name="state" required defaultValue={address?.state} placeholder="Estado" className="input" />
-          <input name="zip" required defaultValue={address?.zip} placeholder="Código postal" className="input" />
-          <input name="phone" defaultValue={address?.phone ?? ""} placeholder="Teléfono de contacto" className="input" />
-          <div className="sm:col-span-2">
-            <button type="submit" className="btn-primary">
-              Guardar dirección
-            </button>
-          </div>
-        </form>
-      </section>
-
-      <section className="card">
-        <h2 className="flex items-center gap-2 font-bold text-sun-text">
-          <span>💳</span> Método de pago contra entrega
-        </h2>
-        <p className="mt-1 text-sm text-ink-soft">
-          El repartidor necesita saber con qué vas a pagar para traer la máquina correcta (o
-          nada, si es en efectivo). Nunca se guardan datos de tarjeta — solo eliges cuál usarás
-          al momento de la entrega.
-        </p>
-        <form action={setPreferredPaymentMethod} className="mt-4 flex flex-col gap-3">
-          <div className="flex flex-wrap gap-3">
-            {PAYMENT_METHODS.map((m) => (
-              <label
-                key={m.value}
-                className="flex items-center gap-2 rounded-2xl border-2 border-black/10 px-4 py-2.5 text-sm font-semibold has-[:checked]:border-sun has-[:checked]:bg-sun-light has-[:checked]:text-sun-text"
-              >
-                <input
-                  type="radio"
-                  name="preferredPaymentMethod"
-                  value={m.value}
-                  defaultChecked={preferredPaymentMethod === m.value}
-                  className="accent-sun"
-                />
-                {m.label}
-              </label>
-            ))}
-          </div>
-          <button type="submit" className="btn-primary self-start">
-            Guardar
-          </button>
-        </form>
-      </section>
-
-      <section className="card">
         <h2 className="flex items-center gap-2 font-bold text-grape-text">
           <span>🤖</span> Pedido automático programado
         </h2>
@@ -178,6 +147,37 @@ export default async function ConfiguracionPage() {
             Guardar
           </button>
         </form>
+      </section>
+
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-ink">
+          <span>👤</span> Mi perfil
+        </h2>
+        <form action={updateProfileAction} className="mt-4 grid gap-3 sm:grid-cols-2">
+          <input name="name" defaultValue={profile.name ?? ""} placeholder="Tu nombre" className="input" />
+          <input value={profile.email} disabled readOnly className="input bg-black/5 text-ink-soft" />
+          <p className="text-xs text-ink-soft sm:col-span-2">
+            El correo es tu identificador de inicio de sesión y no se puede cambiar aquí. Miembro
+            desde {new Date(profile.createdAt).toLocaleDateString("es-MX", { year: "numeric", month: "long", day: "numeric" })}.
+          </p>
+          <div className="sm:col-span-2">
+            <button type="submit" className="btn-primary">
+              Guardar nombre
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section className="card">
+        <h2 className="flex items-center gap-2 font-bold text-ink">
+          <span>🔒</span> Contraseña
+        </h2>
+        <p className="mt-1 text-sm text-ink-soft">
+          {profile.hasPassword
+            ? "Cambia la contraseña con la que entras usando tu correo."
+            : "Tu cuenta solo inicia sesión con Google todavía. Crea una contraseña si también quieres poder entrar con correo y contraseña."}
+        </p>
+        <ChangePasswordForm hasPassword={profile.hasPassword} />
       </section>
     </div>
   );

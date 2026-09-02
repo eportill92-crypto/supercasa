@@ -87,9 +87,16 @@ export const selectors = {
     // <div class="slot" ng-click="validaDiaEntrega(horario)">, con la clase "inactive" cuando
     // NO está disponible. El robot elige automáticamente la primera celda disponible.
     firstAvailableDeliverySlot: ".slot:not(.inactive)",
-    // TODO: pendiente verificar el resumen del horario elegido en el paso "Detalle" (para poder
-    // avisarle al usuario qué día/hora quedó reservado), y los pasos de Pago y confirmación
-    // final — placeholders sin confirmar todavía.
+    // Al elegir un horario aparece un modal "Estimado cliente" (avisando que el precio final es
+    // el vigente el día de entrega) con un botón <button data-dismiss="modal"
+    // ng-click="validaCambioDia();">ACEPTAR</button>.
+    acceptDeliveryPriceNoticeButton: "text=ACEPTAR",
+    // Justo debajo, en un <div ng-binding> aparece el texto "Tu elección: <día> de <mes> de
+    // <año>. De <hora inicio> a <hora fin> hrs. $<costo>." — se usa para avisarle al usuario
+    // qué horario quedó reservado en el mensaje final del pedido.
+    deliverySlotSummary: "text=Tu elección",
+    // TODO: pendiente verificar los pasos de Pago y confirmación final — placeholders sin
+    // confirmar todavía.
     paymentMethodCashOnDelivery: "text=Pago contra entrega",
     placeOrderButton: "text=Confirmar pedido",
     orderConfirmedIndicator: "text=Pedido confirmado",

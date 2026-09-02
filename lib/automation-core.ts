@@ -127,22 +127,27 @@ export async function runLacomerOrderForUser(
     });
 
     if (result.success) {
+      const notes = [dryRun ? "Pedido simulado (LACOMER_DRY_RUN=true)" : null, result.deliverySlotText]
+        .filter(Boolean)
+        .join(" — ");
       const order = await registerOrderForUser(userId, {
         items: lineItems.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         source: "automatico",
-        notes: dryRun ? "Pedido simulado (LACOMER_DRY_RUN=true)" : undefined,
+        notes: notes || undefined,
       });
+      const successMessage =
+        "Pedido completado con éxito." + (result.deliverySlotText ? ` ${result.deliverySlotText}` : "");
       await prisma.automationLog.update({
         where: { id: log.id },
         data: {
           status: "success",
           finishedAt: new Date(),
-          message: "Pedido completado" + (dryRun ? " (simulado)" : ""),
+          message: successMessage + (dryRun ? " (simulado)" : ""),
           orderId: order.id,
           screenshotPath: result.screenshotPaths.at(-1),
         },
       });
-      return { logId: log.id, success: true, message: "Pedido completado con éxito." };
+      return { logId: log.id, success: true, message: successMessage };
     }
 
     await prisma.automationLog.update({

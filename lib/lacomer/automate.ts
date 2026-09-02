@@ -26,6 +26,9 @@ export type AutomationResult = {
   steps: AutomationStep[];
   screenshotPaths: string[];
   errorMessage?: string;
+  // Texto tal cual lo muestra el sitio (ej. "Tu elección: miércoles 02 de septiembre de 2026.
+  // De 08:00 a 09:00 hrs. $0.00.") para poder avisarle al usuario qué horario de entrega quedó.
+  deliverySlotText?: string;
 };
 
 export type RunOrderOptions = {
@@ -72,11 +75,15 @@ export async function runLacomerOrder(opts: RunOrderOptions): Promise<Automation
     }
     await screenshot(page, opts.screenshotDir, "02-carrito", screenshotPaths, async () => {});
 
-    await checkout(page, opts.address);
+    const { deliverySlotText } = await checkout(page, opts.address);
     await screenshot(page, opts.screenshotDir, "03-checkout", screenshotPaths, async () => {});
-    await record({ step: "checkout_pago_contra_entrega", ok: true });
+    await record({
+      step: "checkout_pago_contra_entrega",
+      ok: true,
+      detail: deliverySlotText,
+    });
 
-    return { success: true, steps, screenshotPaths };
+    return { success: true, steps, screenshotPaths, deliverySlotText };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await record({ step: "error", ok: false, detail: message });
@@ -121,7 +128,10 @@ async function addItemToCart(page: Page, item: OrderLineItem) {
 // ya debe estar guardada en la cuenta de antemano (ver README: es un requisito previo manual,
 // no algo que este robot registre solo — el alta de una dirección nueva pide un código de
 // verificación por correo/SMS que un robot no puede leer).
-async function checkout(page: Page, _address: DeliveryAddressInput) {
+async function checkout(
+  page: Page,
+  _address: DeliveryAddressInput
+): Promise<{ deliverySlotText?: string }> {
   await page.click(selectors.cart.cartIcon);
   await page.click(selectors.cart.checkoutButton);
 
@@ -137,8 +147,18 @@ async function checkout(page: Page, _address: DeliveryAddressInput) {
   await page.click(selectors.checkout.declineConsultationCallButton);
   await page.click(selectors.checkout.continueButton);
 
-  // Paso 3: Horario — elige automáticamente el primer horario de entrega disponible.
+  // Paso 3: Horario — elige automáticamente el primer horario de entrega disponible. Al
+  // elegirlo aparece un aviso de "precio vigente el día de entrega" que hay que aceptar, y
+  // justo debajo queda un resumen en texto ("Tu elección: ...") que capturamos para avisarle
+  // al usuario qué horario quedó.
   await page.locator(selectors.checkout.firstAvailableDeliverySlot).first().click();
+  await page.click(selectors.checkout.acceptDeliveryPriceNoticeButton);
+  const deliverySlotText = await page
+    .locator(selectors.checkout.deliverySlotSummary)
+    .first()
+    .textContent()
+    .then((t) => t?.trim())
+    .catch(() => undefined);
   await page.click(selectors.checkout.continueButton);
 
   // Paso 4: Pago — contra entrega, nunca tarjeta.
@@ -150,6 +170,8 @@ async function checkout(page: Page, _address: DeliveryAddressInput) {
   await page.waitForSelector(selectors.checkout.orderConfirmedIndicator, {
     timeout: TIMEOUTS.navigation,
   });
+
+  return { deliverySlotText: deliverySlotText || undefined };
 }
 
 async function screenshot(
@@ -183,7 +205,8 @@ export async function runLacomerOrderDryRun(opts: RunOrderOptions): Promise<Auto
   for (const item of opts.items) {
     await record({ step: `agregar_carrito:${item.name} (simulado)`, ok: true });
   }
-  await record({ step: "checkout_pago_contra_entrega (simulado)", ok: true });
+  const deliverySlotText = "Tu elección: mañana. De 08:00 a 09:00 hrs. $0.00. (simulado)";
+  await record({ step: "checkout_pago_contra_entrega (simulado)", ok: true, detail: deliverySlotText });
 
-  return { success: true, steps, screenshotPaths: [] };
+  return { success: true, steps, screenshotPaths: [], deliverySlotText };
 }

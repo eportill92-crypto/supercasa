@@ -62,8 +62,10 @@ export const selectors = {
     quantityInput: 'input[id^="pediCant_"]',
   },
   cart: {
-    cartIcon: '[aria-label="Carrito"], [data-testid="cart-icon"]',
-    checkoutButton: 'text=Proceder al pago',
+    // Verificado (2026-09-02): <img id="carritoH" alt="Mi carrito"> en el header.
+    cartIcon: "#carritoH",
+    // TODO: falta verificar contra el sitio real.
+    checkoutButton: "text=Proceder al pago",
   },
   checkout: {
     addressStepConfirmButton: 'text=Confirmar dirección',

@@ -67,6 +67,10 @@ export const selectors = {
     // Verificado (2026-09-02): el carrito NO tiene un botón genérico "Proceder al pago" — al
     // final hay dos botones, "Entrega a domicilio" / "Recoger en tienda". Usamos el primero.
     checkoutButton: "text=Entrega a domicilio",
+    // TODO: sin verificar del todo. Tras "Entrega a domicilio" aparece un modal "¿Deseas
+    // agregar algo más al carrito?" (NO/SI) — este selector es una suposición razonable
+    // (no se inspeccionó el HTML real), hay que confirmarlo en un dry-run con LACOMER_HEADFUL.
+    declineAddMoreItemsButton: 'button:visible:has-text("NO")',
   },
   checkout: {
     // Verificado (2026-09-02): el checkout real es un wizard de 5 pasos — Revisar pedido →
@@ -79,9 +83,13 @@ export const selectors = {
     // ng-click="checkoutData.mostrarCheckRadio = 'OK'">NO</button> (el nombre del ng-click es
     // engañoso, pero el texto visible "NO" es confiable).
     declineConsultationCallButton: 'button.button__encuesta:has-text("NO")',
-    // TODO: pendiente verificar el resto de los pasos (Horario, Pago, Detalle/confirmación
-    // final) — placeholders sin confirmar todavía.
-    addressStepConfirmButton: "text=Confirmar dirección",
+    // Paso "Horario" (2026-09-02): cuadrícula de día x hora, cada celda es
+    // <div class="slot" ng-click="validaDiaEntrega(horario)">, con la clase "inactive" cuando
+    // NO está disponible. El robot elige automáticamente la primera celda disponible.
+    firstAvailableDeliverySlot: ".slot:not(.inactive)",
+    // TODO: pendiente verificar el resumen del horario elegido en el paso "Detalle" (para poder
+    // avisarle al usuario qué día/hora quedó reservado), y los pasos de Pago y confirmación
+    // final — placeholders sin confirmar todavía.
     paymentMethodCashOnDelivery: "text=Pago contra entrega",
     placeOrderButton: "text=Confirmar pedido",
     orderConfirmedIndicator: "text=Pedido confirmado",

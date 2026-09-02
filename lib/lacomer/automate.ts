@@ -116,15 +116,36 @@ async function addItemToCart(page: Page, item: OrderLineItem) {
   await firstCard.locator(selectors.search.resultAddToCartButton).click();
 }
 
+// El checkout real de lacomer.com.mx es un wizard de 5 pasos (Revisar pedido → Dirección →
+// Horario → Pago → Detalle), todos con el mismo botón "Continuar" para avanzar. La dirección
+// ya debe estar guardada en la cuenta de antemano (ver README: es un requisito previo manual,
+// no algo que este robot registre solo — el alta de una dirección nueva pide un código de
+// verificación por correo/SMS que un robot no puede leer).
 async function checkout(page: Page, _address: DeliveryAddressInput) {
   await page.click(selectors.cart.cartIcon);
   await page.click(selectors.cart.checkoutButton);
 
-  // La dirección normalmente ya está guardada en la cuenta de La Comer; aquí solo se confirma.
-  // Si el checkout requiere llenar campos de dirección manualmente, esos selectores hacen falta
-  // en config.ts, y aquí hay que usar los campos de `_address` para llenarlos.
-  await page.click(selectors.checkout.addressStepConfirmButton);
+  // Modal "¿Deseas agregar algo más al carrito?" — siempre "NO" (ya se agregaron todos los
+  // productos del pedido).
+  await page.click(selectors.cart.declineAddMoreItemsButton);
+
+  // Paso 1: Revisar pedido — nada que llenar, solo avanzar.
+  await page.click(selectors.checkout.continueButton);
+
+  // Paso 2: Dirección — ya viene seleccionada la guardada en la cuenta; solo hay que responder
+  // que no se quiere una llamada de consulta.
+  await page.click(selectors.checkout.declineConsultationCallButton);
+  await page.click(selectors.checkout.continueButton);
+
+  // Paso 3: Horario — elige automáticamente el primer horario de entrega disponible.
+  await page.locator(selectors.checkout.firstAvailableDeliverySlot).first().click();
+  await page.click(selectors.checkout.continueButton);
+
+  // Paso 4: Pago — contra entrega, nunca tarjeta.
   await page.click(selectors.checkout.paymentMethodCashOnDelivery);
+  await page.click(selectors.checkout.continueButton);
+
+  // Paso 5: Detalle — confirmación final del pedido.
   await page.click(selectors.checkout.placeOrderButton);
   await page.waitForSelector(selectors.checkout.orderConfirmedIndicator, {
     timeout: TIMEOUTS.navigation,

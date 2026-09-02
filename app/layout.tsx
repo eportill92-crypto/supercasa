@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { logoutAction } from "@/lib/actions/auth";
+import RegisterServiceWorker from "@/components/RegisterServiceWorker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -18,13 +19,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SuperCasa",
   description: "Inventario de despensa y pedidos automáticos a La Comer",
+  appleWebApp: {
+    // Le dice a iOS que al agregarla a pantalla de inicio abra en modo app (sin la barra del
+    // navegador) en vez de como un simple acceso directo a Safari.
+    capable: true,
+    title: "SuperCasa",
+    statusBarStyle: "default",
+  },
 };
 
 // La app solo tiene tema claro por ahora. Sin esto, algunos navegadores móviles (ej. "Forzar
 // oscuro" de Chrome en Android) reinterpretan los colores fijos de la página y dejan texto
-// invisible sobre fondo negro.
+// invisible sobre fondo negro. themeColor pinta la barra de estado/título del navegador (y de
+// la app instalada) del azul de marca en vez del gris/blanco por default.
 export const viewport: Viewport = {
   colorScheme: "light",
+  themeColor: "#2563eb",
 };
 
 const NAV_LINKS = [
@@ -46,6 +56,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-cream text-ink">
+        <RegisterServiceWorker />
         <header className="sticky top-0 z-10 border-b border-black/5 bg-white/90 backdrop-blur">
           <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:px-6">
             <div className="flex items-center justify-between gap-4">

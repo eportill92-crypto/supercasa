@@ -13,5 +13,11 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  // manifest.webmanifest/icon.png/apple-icon.png/sw.js/icons/ también deben quedar fuera: los
+  // pide el navegador sin sesión (ej. al evaluar si puede ofrecer "Instalar" la PWA), y sin esta
+  // excepción el middleware los redirigía a /login en vez de servir el archivo real, rompiendo
+  // la instalación por completo.
+  matcher: [
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|manifest.webmanifest|icon.png|apple-icon.png|sw.js|icons/).*)",
+  ],
 };

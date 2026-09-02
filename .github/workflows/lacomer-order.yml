@@ -22,9 +22,15 @@ name: Robot de pedido La Comer
 # en la sesión gráfica de tu Mac, algo que el runner de nube nunca tuvo) en vez de headless, que
 # suele ser suficiente para pasar el challenge de Cloudflare.
 on:
-  schedule:
-    # 13:00 UTC = 07:00 CDMX en horario estándar (UTC-6) / 08:00 en horario de verano (UTC-5).
-    - cron: "0 13 * * *"
+  # ⏸️ PAUSADO (2026-09-02): el cron diario queda comentado a propósito. Automatizar compras
+  # contra lacomer.com.mx implica evadir su protección anti-bot (Cloudflare) para lograr que
+  # cargue, y no está claro qué tan de acuerdo es eso con sus Términos y Condiciones — se decidió
+  # esperar a buscar una integración real con ellos (o alguien más) en vez de seguir insistiendo
+  # por este camino. El botón manual y el runner siguen configurados para cuando se retome, pero
+  # nada debe correr solo mientras tanto.
+  # schedule:
+  #   # 13:00 UTC = 07:00 CDMX en horario estándar (UTC-6) / 08:00 en horario de verano (UTC-5).
+  #   - cron: "0 13 * * *"
   workflow_dispatch:
     inputs:
       userId:

@@ -13,6 +13,23 @@ import {
 type IngredientRow = { productName: string; unit: string; quantity: number };
 type RecipeCategoryOption = { id: string; name: string; emoji: string };
 
+// Una foto de celular normal pesa varios MB — la reducimos en el navegador antes de
+// subirla (más rápido, más barato en la API, y evita el límite de tamaño del server).
+async function compressImage(file: File, maxDimension = 1600, quality = 0.82): Promise<File> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, maxDimension / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+
+  const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", quality));
+  if (!blob) return file;
+  return new File([blob], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+}
+
 const MEAL_TYPES = [
   { value: "desayuno", label: "Desayuno" },
   { value: "comida", label: "Comida" },
@@ -57,10 +74,15 @@ export default function AddRecipeForm({ categories }: { categories: RecipeCatego
   function handleFileExtract(file: File | undefined, kind: "image" | "pdf") {
     if (!file) return;
     setExtractMessage(null);
+    if (kind === "pdf" && file.size > 8 * 1024 * 1024) {
+      setExtractMessage("Ese PDF pesa demasiado (máximo 8MB) — intenta con uno más chico.");
+      return;
+    }
     startExtractTransition(async () => {
       try {
+        const uploadFile = kind === "image" ? await compressImage(file) : file;
         const fd = new FormData();
-        fd.set("file", file);
+        fd.set("file", uploadFile);
         const extracted = await (kind === "image" ? extractRecipeFromImage(fd) : extractRecipeFromPdf(fd));
         applyExtracted(extracted);
       } catch (err) {

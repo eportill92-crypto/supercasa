@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { addRecipe } from "@/lib/actions/recipes";
 import { createRecipeCategory } from "@/lib/actions/categories";
+import {
+  extractRecipeFromImage,
+  extractRecipeFromPdf,
+  extractRecipeFromLink,
+  type ExtractedRecipe,
+} from "@/lib/actions/recipe-extraction";
 
 type IngredientRow = { productName: string; unit: string; quantity: number };
 type RecipeCategoryOption = { id: string; name: string; emoji: string };
@@ -25,6 +31,60 @@ export default function AddRecipeForm({ categories }: { categories: RecipeCatego
   const [rows, setRows] = useState<IngredientRow[]>([{ productName: "", unit: "pza", quantity: 1 }]);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+
+  const [linkUrl, setLinkUrl] = useState("");
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [isExtracting, startExtractTransition] = useTransition();
+  const [extractMessage, setExtractMessage] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  function applyExtracted(extracted: ExtractedRecipe) {
+    setName(extracted.name);
+    setServings(extracted.servings);
+    setInstructions(extracted.instructions);
+    setRows(
+      extracted.ingredients.map((i) => ({ productName: i.name, unit: i.unit, quantity: i.quantity }))
+    );
+    const matched = categories.find((c) => c.name.toLowerCase() === extracted.suggestedCategory.toLowerCase());
+    if (matched) {
+      setRecipeCategoryId(matched.id);
+      setShowNewCategory(false);
+    }
+    setExtractMessage(`Detectamos "${extracted.name}" — revísala antes de guardar. 👇`);
+  }
+
+  function handleFileExtract(file: File | undefined, kind: "image" | "pdf") {
+    if (!file) return;
+    setExtractMessage(null);
+    startExtractTransition(async () => {
+      try {
+        const fd = new FormData();
+        fd.set("file", file);
+        const extracted = await (kind === "image" ? extractRecipeFromImage(fd) : extractRecipeFromPdf(fd));
+        applyExtracted(extracted);
+      } catch (err) {
+        setExtractMessage(err instanceof Error ? err.message : "No se pudo leer la receta");
+      }
+    });
+  }
+
+  function handleLinkExtract() {
+    if (!linkUrl.trim()) return;
+    setExtractMessage(null);
+    startExtractTransition(async () => {
+      try {
+        const fd = new FormData();
+        fd.set("url", linkUrl.trim());
+        const extracted = await extractRecipeFromLink(fd);
+        applyExtracted(extracted);
+        setLinkUrl("");
+        setShowLinkInput(false);
+      } catch (err) {
+        setExtractMessage(err instanceof Error ? err.message : "No se pudo leer la receta");
+      }
+    });
+  }
 
   function updateRow(index: number, patch: Partial<IngredientRow>) {
     setRows((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)));
@@ -72,6 +132,68 @@ export default function AddRecipeForm({ categories }: { categories: RecipeCatego
 
   return (
     <div id="agregar-receta" className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          ref={photoInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => handleFileExtract(e.target.files?.[0], "image")}
+        />
+        <button
+          type="button"
+          disabled={isExtracting}
+          onClick={() => photoInputRef.current?.click()}
+          className="btn-secondary"
+        >
+          📷 Foto
+        </button>
+
+        <input
+          ref={pdfInputRef}
+          type="file"
+          accept="application/pdf"
+          className="hidden"
+          onChange={(e) => handleFileExtract(e.target.files?.[0], "pdf")}
+        />
+        <button
+          type="button"
+          disabled={isExtracting}
+          onClick={() => pdfInputRef.current?.click()}
+          className="btn-secondary"
+        >
+          📄 PDF
+        </button>
+
+        <button
+          type="button"
+          disabled={isExtracting}
+          onClick={() => setShowLinkInput((v) => !v)}
+          className="btn-secondary"
+        >
+          🔗 Link
+        </button>
+
+        {isExtracting && <span className="text-xs font-semibold text-brand-text">Leyendo la receta…</span>}
+      </div>
+
+      {showLinkInput && (
+        <div className="flex gap-2">
+          <input
+            value={linkUrl}
+            onChange={(e) => setLinkUrl(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleLinkExtract()}
+            placeholder="Pega el link de la receta"
+            className="input flex-1"
+          />
+          <button type="button" disabled={isExtracting} onClick={handleLinkExtract} className="btn-primary">
+            Leer
+          </button>
+        </div>
+      )}
+
+      {extractMessage && <p className="text-sm font-semibold text-mint-text">{extractMessage}</p>}
+
       <div className="grid gap-3 sm:grid-cols-3">
         <input
           value={name}

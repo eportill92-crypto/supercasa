@@ -27,21 +27,14 @@ export default async function RecetasPage({
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <a href="#agregar-receta" className="btn-secondary">
-          📷 Foto
-        </a>
-        <a href="#agregar-receta" className="btn-secondary">
-          📄 PDF
-        </a>
-        <a href="#agregar-receta" className="btn-secondary">
-          🔗 Link
-        </a>
-      </div>
-      <p className="-mt-6 text-xs text-ink-soft">
-        Por ahora, cargar por foto/PDF/link te lleva al formulario de abajo para completarla a
-        mano — el reconocimiento automático llega después.
-      </p>
+      <a href="#agregar-receta" className="card flex items-center gap-3 !p-4">
+        <span className="text-xl">✨</span>
+        <div className="flex-1">
+          <div className="text-sm font-bold">Agregar receta con foto, PDF o link</div>
+          <div className="text-xs text-ink-soft">La leemos y precargamos los datos por ti.</div>
+        </div>
+        <span aria-hidden>↓</span>
+      </a>
 
       <IngredientSearch />
 

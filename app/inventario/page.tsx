@@ -87,68 +87,60 @@ export default async function InventarioPage() {
           <h2 className="mb-2 text-xs font-extrabold uppercase tracking-wide text-ink-soft">
             {group.emoji} {group.name}
           </h2>
-          <div className="card overflow-x-auto !p-0">
-            <table className="w-full text-sm">
-              <tbody>
-                {group.items.map((item) => {
-                  const level = stockLevel(item.quantity, item.minThreshold);
-                  const badge = STOCK_BADGE[level];
-                  return (
-                    <tr key={item.id} className="border-b border-black/5 last:border-0">
-                      <td className="px-4 py-3">
-                        <div className="font-bold text-ink">{item.product.name}</div>
-                        <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-ink-soft">
-                          <span className={badge.className}>{badge.label}</span>
-                          {item.product.brand && <span>🏷️ {item.product.brand}</span>}
-                          <span>· {item.product.unit}</span>
-                          {(() => {
-                            const days = estimateDaysRemaining(item.quantity, usageRates.get(item.productId));
-                            return days !== null && days <= 5 ? <span className="badge-berry">~{days} días</span> : null;
-                          })()}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <form action={updatePantryItem} className="flex items-center gap-1">
-                          <input type="hidden" name="id" value={item.id} />
-                          <input type="hidden" name="minThreshold" value={item.minThreshold} />
-                          <input type="hidden" name="targetQty" value={item.targetQty ?? ""} />
-                          <input
-                            name="quantity"
-                            type="number"
-                            step="0.5"
-                            defaultValue={item.quantity}
-                            className="w-16 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
-                          />
-                          <button type="submit" className="btn-ghost !px-2 !py-1 text-xs">
-                            Guardar
-                          </button>
-                        </form>
-                      </td>
-                      <td className="px-4 py-3">
-                        <form action={useProduct} className="flex items-center gap-1">
-                          <input type="hidden" name="productId" value={item.productId} />
-                          <input type="hidden" name="quantity" value={1} />
-                          <button
-                            type="submit"
-                            className="rounded-full bg-mint px-3 py-1.5 text-xs font-bold text-white transition hover:bg-mint-dark active:scale-95"
-                          >
-                            Usar 1
-                          </button>
-                        </form>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <form action={deletePantryItem}>
-                          <input type="hidden" name="id" value={item.id} />
-                          <button type="submit" className="text-xs font-semibold text-ink-soft hover:text-berry-text">
-                            Quitar
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="card flex flex-col divide-y divide-black/5 !p-0">
+            {group.items.map((item) => {
+              const level = stockLevel(item.quantity, item.minThreshold);
+              const badge = STOCK_BADGE[level];
+              return (
+                <div key={item.id} className="flex flex-col gap-2 px-4 py-3 text-sm">
+                  <div>
+                    <div className="font-bold text-ink">{item.product.name}</div>
+                    <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-ink-soft">
+                      <span className={badge.className}>{badge.label}</span>
+                      {item.product.brand && <span>🏷️ {item.product.brand}</span>}
+                      <span>· {item.product.unit}</span>
+                      {(() => {
+                        const days = estimateDaysRemaining(item.quantity, usageRates.get(item.productId));
+                        return days !== null && days <= 5 ? <span className="badge-berry">~{days} días</span> : null;
+                      })()}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <form action={updatePantryItem} className="flex items-center gap-1">
+                      <input type="hidden" name="id" value={item.id} />
+                      <input type="hidden" name="minThreshold" value={item.minThreshold} />
+                      <input type="hidden" name="targetQty" value={item.targetQty ?? ""} />
+                      <input
+                        name="quantity"
+                        type="number"
+                        step="0.5"
+                        defaultValue={item.quantity}
+                        className="w-16 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
+                      />
+                      <button type="submit" className="btn-ghost !px-2 !py-1 text-xs">
+                        Guardar
+                      </button>
+                    </form>
+                    <form action={useProduct}>
+                      <input type="hidden" name="productId" value={item.productId} />
+                      <input type="hidden" name="quantity" value={1} />
+                      <button
+                        type="submit"
+                        className="rounded-full bg-mint px-3 py-1.5 text-xs font-bold text-white transition hover:bg-mint-dark active:scale-95"
+                      >
+                        Usar 1
+                      </button>
+                    </form>
+                    <form action={deletePantryItem} className="ml-auto">
+                      <input type="hidden" name="id" value={item.id} />
+                      <button type="submit" className="text-xs font-semibold text-ink-soft hover:text-berry-text">
+                        Quitar
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       ))}

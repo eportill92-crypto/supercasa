@@ -136,6 +136,24 @@ export async function addRecipe(input: AddRecipeInput) {
   revalidatePath("/menu-semanal");
 }
 
+// Las porciones que registra una receta son solo una referencia (no siempre va a comer
+// la misma cantidad de gente) — se puede corregir en cualquier momento. Solo aplica a
+// recetas propias del usuario; las recetas base son compartidas entre todos.
+export async function updateRecipeServings(formData: FormData) {
+  const userId = await requireUserId();
+  const id = String(formData.get("id"));
+  const servings = Number(formData.get("servings"));
+  if (!(servings > 0)) throw new Error("Las porciones deben ser mayores a 0");
+
+  await prisma.recipe.updateMany({
+    where: { id, userId },
+    data: { servings: Math.round(servings) },
+  });
+
+  revalidatePath("/recetas");
+  revalidatePath("/menu-semanal");
+}
+
 export async function deleteRecipe(formData: FormData) {
   const userId = await requireUserId();
   const id = String(formData.get("id"));

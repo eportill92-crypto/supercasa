@@ -109,29 +109,40 @@ export default function MealPlanGrid({
                       key={i}
                       className="min-w-[140px] rounded-2xl border border-black/5 bg-cream/60 p-2 align-top"
                     >
-                      {entry ? (
+                      {editing ? (
+                        <AssignForm
+                          recipes={recipes}
+                          initialRecipeId={entry?.recipeId}
+                          initialServings={entry?.servings}
+                          onCancel={() => setEditingKey(null)}
+                          onSubmit={(recipeId, servings) => onAssign(day, mealType, recipeId, servings)}
+                        />
+                      ) : entry ? (
                         <div className="flex flex-col gap-1">
                           <span className="text-xs font-bold text-ink">{entry.recipe.name}</span>
                           <span className="text-xs text-ink-soft">{entry.servings} porciones</span>
                           {entry.prepared ? (
                             <span className="badge-mint mt-1 w-fit">✔ Preparada</span>
                           ) : (
-                            <button
-                              type="button"
-                              disabled={isPending}
-                              onClick={() => onPrepare(entry.id)}
-                              className="mt-1 rounded-full bg-mint px-2.5 py-1 text-xs font-bold text-white transition hover:bg-mint-dark disabled:opacity-50"
-                            >
-                              Preparar
-                            </button>
+                            <div className="mt-1 flex items-center gap-2">
+                              <button
+                                type="button"
+                                disabled={isPending}
+                                onClick={() => onPrepare(entry.id)}
+                                className="rounded-full bg-mint px-2.5 py-1 text-xs font-bold text-white transition hover:bg-mint-dark disabled:opacity-50"
+                              >
+                                Preparar
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingKey(key)}
+                                className="text-xs font-semibold text-ink-soft hover:text-brand"
+                              >
+                                Editar
+                              </button>
+                            </div>
                           )}
                         </div>
-                      ) : editing ? (
-                        <AssignForm
-                          recipes={recipes}
-                          onCancel={() => setEditingKey(null)}
-                          onSubmit={(recipeId, servings) => onAssign(day, mealType, recipeId, servings)}
-                        />
                       ) : (
                         <button
                           type="button"
@@ -156,15 +167,19 @@ export default function MealPlanGrid({
 
 function AssignForm({
   recipes,
+  initialRecipeId,
+  initialServings,
   onSubmit,
   onCancel,
 }: {
   recipes: RecipeOption[];
+  initialRecipeId?: string;
+  initialServings?: number;
   onSubmit: (recipeId: string, servings: number) => void;
   onCancel: () => void;
 }) {
-  const [recipeId, setRecipeId] = useState(recipes[0]?.id ?? "");
-  const [servings, setServings] = useState(recipes[0]?.servings ?? 4);
+  const [recipeId, setRecipeId] = useState(initialRecipeId ?? recipes[0]?.id ?? "");
+  const [servings, setServings] = useState(initialServings ?? recipes[0]?.servings ?? 4);
 
   return (
     <div className="flex flex-col gap-1">

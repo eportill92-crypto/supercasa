@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { getRecipeRecommendations, deleteRecipe } from "@/lib/actions/recipes";
+import { getRecipeRecommendations, deleteRecipe, updateRecipeServings } from "@/lib/actions/recipes";
 import { listRecipeCategories } from "@/lib/actions/categories";
 import AddRecipeForm from "@/components/AddRecipeForm";
 import AddMissingButton from "@/components/RecipeActions";
@@ -70,7 +70,24 @@ export default async function RecetasPage({
                     </span>
                   )}
                   {r.source === "user" && <span className="badge-mint">Tuya</span>}
-                  <span className="text-xs text-ink-soft">{r.servings} 👤</span>
+                  {r.source === "user" ? (
+                    <form action={updateRecipeServings} className="flex items-center gap-1">
+                      <input type="hidden" name="id" value={r.id} />
+                      <input
+                        name="servings"
+                        type="number"
+                        min={1}
+                        defaultValue={r.servings}
+                        className="w-12 rounded-lg border-2 border-black/10 px-1.5 py-0.5 text-xs"
+                      />
+                      <span className="text-xs text-ink-soft">👤</span>
+                      <button type="submit" className="btn-ghost !px-2 !py-0.5 text-xs">
+                        Guardar
+                      </button>
+                    </form>
+                  ) : (
+                    <span className="text-xs text-ink-soft">{r.servings} 👤</span>
+                  )}
                   {r.timesUsedByMe > 0 && (
                     <span className="text-xs text-ink-soft">
                       La preparaste {r.timesUsedByMe} {r.timesUsedByMe === 1 ? "vez" : "veces"}

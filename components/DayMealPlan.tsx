@@ -71,17 +71,28 @@ export default function DayMealPlan({
             <span className="text-xl">{MEAL_ICONS[mealType]}</span>
             <div className="flex-1">
               <div className="text-xs font-extrabold uppercase tracking-wide text-ink-soft">{MEAL_LABELS[mealType]}</div>
-              {entry ? (
-                <div className="mt-0.5 flex items-center gap-2">
-                  <span className="text-sm font-bold">{entry.recipe.name}</span>
-                  <span className="text-xs text-ink-soft">{entry.servings} 👤</span>
-                </div>
-              ) : editing === mealType ? (
+              {editing === mealType ? (
                 <AssignForm
                   recipes={recipes}
+                  initialRecipeId={entry?.recipeId}
+                  initialServings={entry?.servings}
                   onCancel={() => setEditing(null)}
                   onSubmit={(recipeId, servings) => onAssign(mealType, recipeId, servings)}
                 />
+              ) : entry ? (
+                <div className="mt-0.5 flex items-center gap-2">
+                  <span className="text-sm font-bold">{entry.recipe.name}</span>
+                  <span className="text-xs text-ink-soft">{entry.servings} 👤</span>
+                  {!entry.prepared && (
+                    <button
+                      type="button"
+                      onClick={() => setEditing(mealType)}
+                      className="text-xs font-semibold text-brand-text underline"
+                    >
+                      Editar
+                    </button>
+                  )}
+                </div>
               ) : (
                 <button
                   type="button"
@@ -115,15 +126,19 @@ export default function DayMealPlan({
 
 function AssignForm({
   recipes,
+  initialRecipeId,
+  initialServings,
   onSubmit,
   onCancel,
 }: {
   recipes: RecipeOption[];
+  initialRecipeId?: string;
+  initialServings?: number;
   onSubmit: (recipeId: string, servings: number) => void;
   onCancel: () => void;
 }) {
-  const [recipeId, setRecipeId] = useState(recipes[0]?.id ?? "");
-  const [servings, setServings] = useState(recipes[0]?.servings ?? 4);
+  const [recipeId, setRecipeId] = useState(initialRecipeId ?? recipes[0]?.id ?? "");
+  const [servings, setServings] = useState(initialServings ?? recipes[0]?.servings ?? 4);
 
   return (
     <div className="mt-1 flex flex-wrap items-center gap-1.5">

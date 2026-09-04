@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { assignMeal, prepareMeal } from "@/lib/actions/meal-plan";
+import { addMeal, updateMealEntry, removeMeal, prepareMeal } from "@/lib/actions/meal-plan";
 import type { MealType } from "@/lib/date-utils";
 
 type RecipeOption = { id: string; name: string; servings: number };
@@ -23,6 +23,8 @@ const MEAL_LABELS: Record<MealType, string> = {
 };
 const MEAL_ICONS: Record<MealType, string> = { desayuno: "🌅", comida: "🍲", cena: "🌙", snack: "🍪" };
 
+type FormTarget = { mode: "add"; mealType: MealType } | { mode: "edit"; entry: Entry };
+
 function isoDate(d: Date) {
   return d.toISOString().slice(0, 10);
 }
@@ -38,19 +40,26 @@ export default function DayMealPlan({
   recipes: RecipeOption[];
   mealTypes: readonly MealType[];
 }) {
-  const [editing, setEditing] = useState<MealType | null>(null);
+  const [formTarget, setFormTarget] = useState<FormTarget | null>(null);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
 
-  function entryFor(mealType: MealType) {
+  function entriesFor(mealType: MealType) {
     const iso = isoDate(day);
-    return entries.find((e) => isoDate(e.date) === iso && e.mealType === mealType);
+    return entries.filter((e) => isoDate(e.date) === iso && e.mealType === mealType);
   }
 
-  function onAssign(mealType: MealType, recipeId: string, servings: number) {
+  function onAdd(mealType: MealType, recipeId: string, servings: number) {
     startTransition(async () => {
-      await assignMeal({ date: isoDate(day), mealType, recipeId, servings });
-      setEditing(null);
+      await addMeal({ date: isoDate(day), mealType, recipeId, servings });
+      setFormTarget(null);
+    });
+  }
+
+  function onUpdate(entryId: string, recipeId: string, servings: number) {
+    startTransition(async () => {
+      await updateMealEntry({ entryId, recipeId, servings });
+      setFormTarget(null);
     });
   }
 
@@ -65,57 +74,80 @@ export default function DayMealPlan({
   return (
     <div className="flex flex-col gap-3">
       {mealTypes.map((mealType) => {
-        const entry = entryFor(mealType);
+        const mealEntries = entriesFor(mealType);
+        const isAdding = formTarget?.mode === "add" && formTarget.mealType === mealType;
+
         return (
-          <div key={mealType} className="card flex items-center gap-3 !p-4">
-            <span className="text-xl">{MEAL_ICONS[mealType]}</span>
-            <div className="flex-1">
-              <div className="text-xs font-extrabold uppercase tracking-wide text-ink-soft">{MEAL_LABELS[mealType]}</div>
-              {editing === mealType ? (
+          <div key={mealType} className="card flex flex-col gap-2 !p-4">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">{MEAL_ICONS[mealType]}</span>
+              <span className="text-xs font-extrabold uppercase tracking-wide text-ink-soft">
+                {MEAL_LABELS[mealType]}
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              {mealEntries.map((entry) =>
+                formTarget?.mode === "edit" && formTarget.entry.id === entry.id ? (
+                  <AssignForm
+                    key={entry.id}
+                    recipes={recipes}
+                    initialRecipeId={entry.recipeId}
+                    initialServings={entry.servings}
+                    onCancel={() => setFormTarget(null)}
+                    onSubmit={(recipeId, servings) => onUpdate(entry.id, recipeId, servings)}
+                  />
+                ) : (
+                  <div key={entry.id} className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-bold">{entry.recipe.name}</span>
+                    <span className="text-xs text-ink-soft">{entry.servings} 👤</span>
+                    {entry.prepared ? (
+                      <span className="badge-mint">✔ Preparada</span>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setFormTarget({ mode: "edit", entry })}
+                          className="text-xs font-semibold text-brand-text underline"
+                        >
+                          Editar
+                        </button>
+                        <form action={removeMeal}>
+                          <input type="hidden" name="id" value={entry.id} />
+                          <button type="submit" className="text-xs font-semibold text-ink-soft hover:text-berry-text">
+                            Quitar
+                          </button>
+                        </form>
+                        <button
+                          type="button"
+                          disabled={isPending}
+                          onClick={() => onPrepare(entry.id)}
+                          className="ml-auto rounded-full bg-mint px-3 py-1.5 text-xs font-bold text-white transition hover:bg-mint-dark disabled:opacity-50"
+                        >
+                          Preparar
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )
+              )}
+
+              {isAdding ? (
                 <AssignForm
                   recipes={recipes}
-                  initialRecipeId={entry?.recipeId}
-                  initialServings={entry?.servings}
-                  onCancel={() => setEditing(null)}
-                  onSubmit={(recipeId, servings) => onAssign(mealType, recipeId, servings)}
+                  onCancel={() => setFormTarget(null)}
+                  onSubmit={(recipeId, servings) => onAdd(mealType, recipeId, servings)}
                 />
-              ) : entry ? (
-                <div className="mt-0.5 flex items-center gap-2">
-                  <span className="text-sm font-bold">{entry.recipe.name}</span>
-                  <span className="text-xs text-ink-soft">{entry.servings} 👤</span>
-                  {!entry.prepared && (
-                    <button
-                      type="button"
-                      onClick={() => setEditing(mealType)}
-                      className="text-xs font-semibold text-brand-text underline"
-                    >
-                      Editar
-                    </button>
-                  )}
-                </div>
               ) : (
                 <button
                   type="button"
-                  onClick={() => setEditing(mealType)}
-                  className="mt-0.5 text-sm font-bold text-mint-text"
+                  onClick={() => setFormTarget({ mode: "add", mealType })}
+                  className="flex items-center gap-1 self-start text-sm font-bold text-mint-text"
                 >
-                  + Elegir receta
+                  <span aria-hidden>+</span> Agregar platillo
                 </button>
               )}
             </div>
-            {entry &&
-              (entry.prepared ? (
-                <span className="badge-mint">✔ Preparada</span>
-              ) : (
-                <button
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => onPrepare(entry.id)}
-                  className="rounded-full bg-mint px-3 py-1.5 text-xs font-bold text-white transition hover:bg-mint-dark disabled:opacity-50"
-                >
-                  Preparar
-                </button>
-              ))}
           </div>
         );
       })}
@@ -141,7 +173,7 @@ function AssignForm({
   const [servings, setServings] = useState(initialServings ?? recipes[0]?.servings ?? 4);
 
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
       <select
         value={recipeId}
         onChange={(e) => {

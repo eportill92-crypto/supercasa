@@ -15,7 +15,10 @@ export async function getWeekMealPlan(weekStart: Date) {
   return entries;
 }
 
-export async function assignMeal(input: {
+// Una comida (desayuno, comida, cena, snack) puede tener más de un platillo — por
+// eso siempre se agrega como una entrada nueva, en vez de reemplazar lo que ya
+// había en ese horario.
+export async function addMeal(input: {
   date: string; // ISO date (yyyy-mm-dd)
   mealType: MealType;
   recipeId: string;
@@ -24,20 +27,20 @@ export async function assignMeal(input: {
   const userId = await requireUserId();
   const date = new Date(`${input.date}T00:00:00.000Z`);
 
-  const existing = await prisma.mealPlanEntry.findFirst({
-    where: { userId, date, mealType: input.mealType },
+  await prisma.mealPlanEntry.create({
+    data: { userId, date, mealType: input.mealType, recipeId: input.recipeId, servings: input.servings },
   });
 
-  if (existing) {
-    await prisma.mealPlanEntry.update({
-      where: { id: existing.id },
-      data: { recipeId: input.recipeId, servings: input.servings },
-    });
-  } else {
-    await prisma.mealPlanEntry.create({
-      data: { userId, date, mealType: input.mealType, recipeId: input.recipeId, servings: input.servings },
-    });
-  }
+  revalidatePath("/menu-semanal");
+}
+
+export async function updateMealEntry(input: { entryId: string; recipeId: string; servings: number }) {
+  const userId = await requireUserId();
+
+  await prisma.mealPlanEntry.updateMany({
+    where: { id: input.entryId, userId },
+    data: { recipeId: input.recipeId, servings: input.servings },
+  });
 
   revalidatePath("/menu-semanal");
 }

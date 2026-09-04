@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { assignMeal, prepareMeal } from "@/lib/actions/meal-plan";
+import { addMeal, updateMealEntry, removeMeal, prepareMeal } from "@/lib/actions/meal-plan";
 import type { MealType } from "@/lib/date-utils";
 
 type RecipeOption = { id: string; name: string; servings: number };
@@ -42,6 +42,8 @@ function isoDate(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
+type FormTarget = { mode: "add"; key: string; date: Date; mealType: MealType } | { mode: "edit"; key: string; entry: Entry };
+
 export default function MealPlanGrid({
   weekDays,
   entries,
@@ -53,19 +55,26 @@ export default function MealPlanGrid({
   recipes: RecipeOption[];
   mealTypes: readonly MealType[];
 }) {
-  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [formTarget, setFormTarget] = useState<FormTarget | null>(null);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
 
-  function entryFor(date: Date, mealType: MealType) {
+  function entriesFor(date: Date, mealType: MealType) {
     const iso = isoDate(date);
-    return entries.find((e) => isoDate(e.date) === iso && e.mealType === mealType);
+    return entries.filter((e) => isoDate(e.date) === iso && e.mealType === mealType);
   }
 
-  function onAssign(date: Date, mealType: MealType, recipeId: string, servings: number) {
+  function onAdd(date: Date, mealType: MealType, recipeId: string, servings: number) {
     startTransition(async () => {
-      await assignMeal({ date: isoDate(date), mealType, recipeId, servings });
-      setEditingKey(null);
+      await addMeal({ date: isoDate(date), mealType, recipeId, servings });
+      setFormTarget(null);
+    });
+  }
+
+  function onUpdate(entryId: string, recipeId: string, servings: number) {
+    startTransition(async () => {
+      await updateMealEntry({ entryId, recipeId, servings });
+      setFormTarget(null);
     });
   }
 
@@ -101,57 +110,79 @@ export default function MealPlanGrid({
                 </td>
                 {weekDays.map((day, i) => {
                   const key = `${isoDate(day)}-${mealType}`;
-                  const entry = entryFor(day, mealType);
-                  const editing = editingKey === key;
+                  const dayEntries = entriesFor(day, mealType);
+                  const isAdding = formTarget?.mode === "add" && formTarget.key === key;
 
                   return (
                     <td
                       key={i}
                       className="min-w-[140px] rounded-2xl border border-black/5 bg-cream/60 p-2 align-top"
                     >
-                      {editing ? (
-                        <AssignForm
-                          recipes={recipes}
-                          initialRecipeId={entry?.recipeId}
-                          initialServings={entry?.servings}
-                          onCancel={() => setEditingKey(null)}
-                          onSubmit={(recipeId, servings) => onAssign(day, mealType, recipeId, servings)}
-                        />
-                      ) : entry ? (
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xs font-bold text-ink">{entry.recipe.name}</span>
-                          <span className="text-xs text-ink-soft">{entry.servings} porciones</span>
-                          {entry.prepared ? (
-                            <span className="badge-mint mt-1 w-fit">✔ Preparada</span>
+                      <div className="flex flex-col gap-1.5">
+                        {dayEntries.map((entry) =>
+                          formTarget?.mode === "edit" && formTarget.entry.id === entry.id ? (
+                            <AssignForm
+                              key={entry.id}
+                              recipes={recipes}
+                              initialRecipeId={entry.recipeId}
+                              initialServings={entry.servings}
+                              onCancel={() => setFormTarget(null)}
+                              onSubmit={(recipeId, servings) => onUpdate(entry.id, recipeId, servings)}
+                            />
                           ) : (
-                            <div className="mt-1 flex items-center gap-2">
-                              <button
-                                type="button"
-                                disabled={isPending}
-                                onClick={() => onPrepare(entry.id)}
-                                className="rounded-full bg-mint px-2.5 py-1 text-xs font-bold text-white transition hover:bg-mint-dark disabled:opacity-50"
-                              >
-                                Preparar
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setEditingKey(key)}
-                                className="text-xs font-semibold text-ink-soft hover:text-brand"
-                              >
-                                Editar
-                              </button>
+                            <div key={entry.id} className="flex flex-col gap-1">
+                              <span className="text-xs font-bold text-ink">{entry.recipe.name}</span>
+                              <span className="text-xs text-ink-soft">{entry.servings} porciones</span>
+                              {entry.prepared ? (
+                                <span className="badge-mint w-fit">✔ Preparada</span>
+                              ) : (
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <button
+                                    type="button"
+                                    disabled={isPending}
+                                    onClick={() => onPrepare(entry.id)}
+                                    className="rounded-full bg-mint px-2.5 py-1 text-xs font-bold text-white transition hover:bg-mint-dark disabled:opacity-50"
+                                  >
+                                    Preparar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setFormTarget({ mode: "edit", key, entry })}
+                                    className="text-xs font-semibold text-ink-soft hover:text-brand"
+                                  >
+                                    Editar
+                                  </button>
+                                  <form action={removeMeal}>
+                                    <input type="hidden" name="id" value={entry.id} />
+                                    <button
+                                      type="submit"
+                                      className="text-xs font-semibold text-ink-soft hover:text-berry-text"
+                                    >
+                                      Quitar
+                                    </button>
+                                  </form>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setEditingKey(key)}
-                          className="text-xs font-semibold text-ink-soft hover:text-brand"
-                        >
-                          + Asignar
-                        </button>
-                      )}
+                          )
+                        )}
+
+                        {isAdding ? (
+                          <AssignForm
+                            recipes={recipes}
+                            onCancel={() => setFormTarget(null)}
+                            onSubmit={(recipeId, servings) => onAdd(day, mealType, recipeId, servings)}
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setFormTarget({ mode: "add", key, date: day, mealType })}
+                            className="self-start text-xs font-semibold text-ink-soft hover:text-brand"
+                          >
+                            + Agregar platillo
+                          </button>
+                        )}
+                      </div>
                     </td>
                   );
                 })}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { logoutAction } from "@/lib/actions/auth";
 
@@ -33,22 +34,16 @@ const SECTIONS: {
 
 export default function AccountMenu({ name, email }: { name: string | null; email: string }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const initial = (name || email || "?").trim().charAt(0).toUpperCase();
 
-  return (
-    <>
-      <button
-        type="button"
-        aria-label="Abrir menú de cuenta"
-        onClick={() => setOpen(true)}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm transition hover:bg-black/5"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round">
-          <path d="M4 7h16M4 12h16M4 17h16" />
-        </svg>
-      </button>
+  // El header usa backdrop-blur, que convierte al header en el "containing block" de
+  // cualquier descendiente position:fixed (lo mismo que transform/filter) — por eso el
+  // menú se veía encogido dentro del header en vez de cubrir toda la pantalla. Renderizarlo
+  // en un portal directo a <body> lo saca de ese contexto por completo.
+  useEffect(() => setMounted(true), []);
 
-      {open && (
+  const menu = open && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/45" onClick={() => setOpen(false)} />
           <div className="relative flex h-full w-[300px] max-w-[85vw] flex-col bg-white shadow-2xl">
@@ -103,7 +98,22 @@ export default function AccountMenu({ name, email }: { name: string | null; emai
             </form>
           </div>
         </div>
-      )}
+  );
+
+  return (
+    <>
+      <button
+        type="button"
+        aria-label="Abrir menú de cuenta"
+        onClick={() => setOpen(true)}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm transition hover:bg-black/5"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+
+      {mounted && menu && createPortal(menu, document.body)}
     </>
   );
 }

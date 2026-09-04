@@ -1,39 +1,83 @@
 export const dynamic = "force-dynamic";
 
+import Link from "next/link";
 import { getRecipeRecommendations, deleteRecipe } from "@/lib/actions/recipes";
+import { listRecipeCategories } from "@/lib/actions/categories";
 import AddRecipeForm from "@/components/AddRecipeForm";
 import AddMissingButton from "@/components/RecipeActions";
+import IngredientSearch from "@/components/IngredientSearch";
 
-const MEAL_LABELS: Record<string, string> = {
-  desayuno: "Desayuno",
-  comida: "Comida",
-  cena: "Cena",
-  snack: "Snack",
-};
+export default async function RecetasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ cat?: string }>;
+}) {
+  const { cat } = await searchParams;
+  const [recipes, categories] = await Promise.all([getRecipeRecommendations(), listRecipeCategories()]);
 
-export default async function RecetasPage() {
-  const recipes = await getRecipeRecommendations();
+  const filtered = cat ? recipes.filter((r) => r.recipeCategoryId === cat) : recipes;
 
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-extrabold">🍳 Recetas</h1>
+        <h1 className="text-3xl font-extrabold">📖 Recetario</h1>
         <p className="mt-1 text-sm text-ink-soft">
           Ordenadas para cocinar con lo que ya tienes: primero tus recetas y las que ya has
           preparado, luego las que más se acercan a tu inventario actual.
         </p>
       </div>
 
+      <div className="flex flex-wrap gap-2">
+        <a href="#agregar-receta" className="btn-secondary">
+          📷 Foto
+        </a>
+        <a href="#agregar-receta" className="btn-secondary">
+          📄 PDF
+        </a>
+        <a href="#agregar-receta" className="btn-secondary">
+          🔗 Link
+        </a>
+      </div>
+      <p className="-mt-6 text-xs text-ink-soft">
+        Por ahora, cargar por foto/PDF/link te lleva al formulario de abajo para completarla a
+        mano — el reconocimiento automático llega después.
+      </p>
+
+      <IngredientSearch />
+
+      <div className="flex flex-wrap gap-2">
+        <Link
+          href="/recetas"
+          className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${!cat ? "bg-mint text-white" : "border-2 border-black/10 bg-white"}`}
+        >
+          Todas
+        </Link>
+        {categories.map((c) => (
+          <Link
+            key={c.id}
+            href={`/recetas?cat=${c.id}`}
+            className={`rounded-full px-3.5 py-1.5 text-xs font-bold ${cat === c.id ? "bg-mint text-white" : "border-2 border-black/10 bg-white"}`}
+          >
+            {c.emoji} {c.name}
+          </Link>
+        ))}
+      </div>
+
       <section className="flex flex-col gap-3">
-        {recipes.map((r) => {
+        {filtered.map((r) => {
           const complete = r.totalCount > 0 && r.haveCount === r.totalCount;
           return (
             <div key={r.id} className="card !p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-bold">{r.name}</span>
-                  {r.mealType && <span className="badge-grape">{MEAL_LABELS[r.mealType] ?? r.mealType}</span>}
+                  {r.recipeCategoryName && (
+                    <span className="badge-grape">
+                      {r.recipeCategoryEmoji} {r.recipeCategoryName}
+                    </span>
+                  )}
                   {r.source === "user" && <span className="badge-mint">Tuya</span>}
+                  <span className="text-xs text-ink-soft">{r.servings} 👤</span>
                   {r.timesUsedByMe > 0 && (
                     <span className="text-xs text-ink-soft">
                       La preparaste {r.timesUsedByMe} {r.timesUsedByMe === 1 ? "vez" : "veces"}
@@ -69,15 +113,15 @@ export default async function RecetasPage() {
             </div>
           );
         })}
-        {recipes.length === 0 && <p className="text-sm text-ink-soft">Aún no hay recetas.</p>}
+        {filtered.length === 0 && <p className="text-sm text-ink-soft">No hay recetas en esta categoría todavía.</p>}
       </section>
 
       <section className="card">
         <h2 className="flex items-center gap-2 font-bold text-brand-text">
-          <span>👩‍🍳</span> Agregar tu propia receta
+          <span>👩‍🍳</span> Agregar receta
         </h2>
         <div className="mt-4">
-          <AddRecipeForm />
+          <AddRecipeForm categories={categories} />
         </div>
       </section>
     </div>

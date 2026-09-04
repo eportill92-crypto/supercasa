@@ -3,20 +3,23 @@ export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { listPantry } from "@/lib/actions/pantry";
 import { computeShoppingList } from "@/lib/actions/shopping-list";
-import { getLastOrder } from "@/lib/actions/orders";
 import { hasLacomerCredentials, getDefaultAddress } from "@/lib/actions/settings";
+import { getWeekMealPlan } from "@/lib/actions/meal-plan";
+import { getMonday } from "@/lib/date-utils";
 
 export default async function Home() {
-  const [pantry, shoppingList, lastOrder, { configured }, address] = await Promise.all([
+  const monday = getMonday(new Date());
+  const [pantry, shoppingList, { configured }, address, weekEntries] = await Promise.all([
     listPantry(),
     computeShoppingList(),
-    getLastOrder(),
     hasLacomerCredentials(),
     getDefaultAddress(),
+    getWeekMealPlan(monday),
   ]);
 
   const lowStockCount = pantry.filter((p) => p.quantity <= p.minThreshold).length;
   const readyToAutomate = configured && !!address;
+  const daysPlanned = new Set(weekEntries.map((e) => new Date(e.date).toDateString())).size;
 
   return (
     <div className="flex flex-col gap-8">
@@ -27,23 +30,16 @@ export default async function Home() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <StatCard icon="📦" label="Productos en inventario" value={pantry.length} href="/inventario" color="brand" />
-        <StatCard
-          icon="🛒"
-          label="Faltantes en la lista"
-          value={shoppingList.length}
-          href="/lista-compra"
-          color={shoppingList.length > 0 ? "sun" : "mint"}
-        />
-        <StatCard
-          icon="⚠️"
-          label="Con stock bajo"
-          value={lowStockCount}
-          href="/inventario"
-          color={lowStockCount > 0 ? "berry" : "mint"}
-        />
+      <div className="grid gap-3 sm:grid-cols-3">
+        <StatCard icon="🧺" label="Productos" value={pantry.length} color="brand" />
+        <StatCard icon="🛒" label="Faltantes" value={shoppingList.length} color={shoppingList.length > 0 ? "sun" : "mint"} />
+        <StatCard icon="📅" label="Días planeados" value={`${daysPlanned}/7`} color="brand" />
       </div>
+
+      <Link href="/inventario" className="-mt-4 flex items-center gap-1 text-sm font-bold text-brand">
+        Ver mi despensa completa
+        <span aria-hidden>→</span>
+      </Link>
 
       {!readyToAutomate && (
         <div className="card border-sun/30 bg-sun-light/60 text-sm text-sun-text">
@@ -59,61 +55,48 @@ export default async function Home() {
         </div>
       )}
 
-      <div className="grid gap-6 sm:grid-cols-2">
-        <section className="card">
-          <h2 className="flex items-center gap-2 font-bold text-brand-text">
-            <span>🛒</span> Lista de compra actual
-          </h2>
-          {shoppingList.length === 0 ? (
-            <p className="mt-3 text-sm text-ink-soft">Todo en orden, no falta nada. ✨</p>
-          ) : (
-            <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-              {shoppingList.slice(0, 6).map((row) => (
-                <li key={row.productId} className="flex justify-between">
-                  <span>{row.name}</span>
-                  <span className="font-semibold text-ink-soft">
-                    {row.suggestedQty} {row.unit}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-          <Link href="/lista-compra" className="btn-ghost mt-4 -ml-4 !px-4">
-            Ir a la lista de compra →
-          </Link>
-        </section>
+      <div className="flex flex-col gap-4">
+        <Link
+          href="/pedir-super"
+          className="rounded-3xl p-6 text-white shadow-lg transition hover:-translate-y-0.5"
+          style={{ background: "linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%)" }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-3xl">🛒</span>
+            {shoppingList.length > 0 && (
+              <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
+                {shoppingList.length} te están faltando
+              </span>
+            )}
+          </div>
+          <div className="mt-3 text-xl font-extrabold">Pedir el súper</div>
+          <p className="mt-1 text-sm opacity-90">
+            Arma tu pedido por categoría — te avisamos qué se te está acabando.
+          </p>
+          <div className="mt-4 flex items-center gap-1.5 text-sm font-bold">
+            Empezar <span aria-hidden>→</span>
+          </div>
+        </Link>
 
-        <section className="card">
-          <h2 className="flex items-center gap-2 font-bold text-mint-text">
-            <span>📋</span> Último pedido
-          </h2>
-          {lastOrder ? (
-            <>
-              <p className="mt-1 text-xs text-ink-soft">
-                {new Date(lastOrder.placedAt).toLocaleString("es-MX", {
-                  dateStyle: "medium",
-                  timeStyle: "short",
-                })}{" "}
-                · {lastOrder.source === "automatico" ? "🤖 Automático" : "✍️ Manual"}
-              </p>
-              <ul className="mt-3 flex flex-col gap-1.5 text-sm">
-                {lastOrder.items.slice(0, 6).map((item) => (
-                  <li key={item.id} className="flex justify-between">
-                    <span>{item.product.name}</span>
-                    <span className="font-semibold text-ink-soft">
-                      {item.quantity} {item.product.unit}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : (
-            <p className="mt-3 text-sm text-ink-soft">Aún no has registrado ningún pedido.</p>
-          )}
-          <Link href="/pedidos" className="btn-ghost mt-4 -ml-4 !px-4">
-            Ver historial de pedidos →
-          </Link>
-        </section>
+        <Link
+          href="/menu-semanal"
+          className="rounded-3xl p-6 text-white shadow-lg transition hover:-translate-y-0.5"
+          style={{ background: "linear-gradient(135deg,#059669 0%,#047857 100%)" }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-3xl">📅</span>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
+              {daysPlanned} de 7 días listos
+            </span>
+          </div>
+          <div className="mt-3 text-xl font-extrabold">Planear tu semana</div>
+          <p className="mt-1 text-sm opacity-90">
+            Desayuno, comida, cena y snacks — generamos la lista de compra sola.
+          </p>
+          <div className="mt-4 flex items-center gap-1.5 text-sm font-bold">
+            Empezar <span aria-hidden>→</span>
+          </div>
+        </Link>
       </div>
     </div>
   );
@@ -123,34 +106,26 @@ const STAT_COLORS = {
   brand: "border-brand/20 bg-brand-light/60 text-brand-text",
   mint: "border-mint/20 bg-mint-light/60 text-mint-text",
   sun: "border-sun/30 bg-sun-light/60 text-sun-text",
-  berry: "border-berry/20 bg-berry-light/60 text-berry-text",
 } as const;
 
 function StatCard({
   icon,
   label,
   value,
-  href,
   color,
 }: {
   icon: string;
   label: string;
-  value: number;
-  href: string;
+  value: number | string;
   color: keyof typeof STAT_COLORS;
 }) {
   return (
-    <Link
-      href={href}
-      className={`flex items-center gap-4 rounded-3xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${STAT_COLORS[color]}`}
-    >
-      <span className="text-3xl" aria-hidden>
+    <div className={`flex flex-col items-center gap-1 rounded-2xl border p-4 text-center ${STAT_COLORS[color]}`}>
+      <span className="text-xl" aria-hidden>
         {icon}
       </span>
-      <div>
-        <div className="text-3xl font-extrabold">{value}</div>
-        <div className="text-sm font-medium opacity-80">{label}</div>
-      </div>
-    </Link>
+      <div className="text-xl font-extrabold">{value}</div>
+      <div className="text-xs font-medium opacity-80">{label}</div>
+    </div>
   );
 }

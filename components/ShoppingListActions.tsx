@@ -3,9 +3,9 @@
 import { useState, useTransition } from "react";
 import { runLacomerOrder } from "@/lib/actions/automation";
 import { registerOrder } from "@/lib/actions/orders";
-import type { ShoppingListRow } from "@/lib/actions/shopping-list";
+import type { ShoppingListRowWithCategory } from "@/lib/actions/shopping-list";
 
-export default function ShoppingListActions({ rows }: { rows: ShoppingListRow[] }) {
+export default function ShoppingListActions({ rows }: { rows: ShoppingListRowWithCategory[] }) {
   const [quantities, setQuantities] = useState<Record<string, number>>(
     Object.fromEntries(rows.map((r) => [r.productId, r.suggestedQty]))
   );
@@ -46,37 +46,50 @@ export default function ShoppingListActions({ rows }: { rows: ShoppingListRow[] 
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col divide-y divide-black/5">
-        {rows.map((row) => (
-          <div key={row.productId} className="flex items-center gap-3 py-2.5">
-            <input
-              type="checkbox"
-              checked={selected[row.productId] ?? true}
-              onChange={(e) => setSelected((prev) => ({ ...prev, [row.productId]: e.target.checked }))}
-              className="h-4 w-4 accent-brand"
-            />
-            <div className="flex-1">
-              <div className="text-sm font-bold">{row.name}</div>
-              <div className="text-xs">
-                {row.reason === "stock_bajo" ? (
-                  <span className="badge-sun">
-                    Tienes {row.currentQty} {row.unit}, mínimo {row.minThreshold}
-                  </span>
-                ) : (
-                  <span className="badge-grape">Agregado manualmente</span>
-                )}
+      <div className="flex flex-col">
+        {rows.map((row, i) => {
+          const showHeader = i === 0 || rows[i - 1].categoryName !== row.categoryName;
+          return (
+            <div key={row.productId}>
+              {showHeader && (
+                <div className="mt-3 mb-1 text-xs font-extrabold uppercase tracking-wide text-ink-soft first:mt-0">
+                  {row.categoryEmoji} {row.categoryName}
+                </div>
+              )}
+              <div className="flex items-center gap-3 border-t border-black/5 py-2.5 first:border-0">
+                <input
+                  type="checkbox"
+                  checked={selected[row.productId] ?? true}
+                  onChange={(e) => setSelected((prev) => ({ ...prev, [row.productId]: e.target.checked }))}
+                  className="h-4 w-4 accent-brand"
+                />
+                <div className="flex-1">
+                  <div className="text-sm font-bold">
+                    {row.name}
+                    {row.brand && <span className="ml-1.5 font-normal text-ink-soft">· {row.brand}</span>}
+                  </div>
+                  <div className="text-xs">
+                    {row.reason === "stock_bajo" ? (
+                      <span className="badge-sun">
+                        Tienes {row.currentQty} {row.unit}, mínimo {row.minThreshold}
+                      </span>
+                    ) : (
+                      <span className="badge-grape">Agregado manualmente</span>
+                    )}
+                  </div>
+                </div>
+                <input
+                  type="number"
+                  step="0.5"
+                  value={quantities[row.productId] ?? row.suggestedQty}
+                  onChange={(e) => setQuantities((prev) => ({ ...prev, [row.productId]: Number(e.target.value) }))}
+                  className="w-20 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
+                />
+                <span className="w-10 text-xs text-ink-soft">{row.unit}</span>
               </div>
             </div>
-            <input
-              type="number"
-              step="0.5"
-              value={quantities[row.productId] ?? row.suggestedQty}
-              onChange={(e) => setQuantities((prev) => ({ ...prev, [row.productId]: Number(e.target.value) }))}
-              className="w-20 rounded-xl border-2 border-black/10 px-2 py-1 text-sm"
-            />
-            <span className="w-10 text-xs text-ink-soft">{row.unit}</span>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex flex-wrap gap-2">

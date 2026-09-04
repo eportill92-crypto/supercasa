@@ -2,8 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { addRecipe } from "@/lib/actions/recipes";
+import { createRecipeCategory } from "@/lib/actions/categories";
 
 type IngredientRow = { productName: string; unit: string; quantity: number };
+type RecipeCategoryOption = { id: string; name: string; emoji: string };
 
 const MEAL_TYPES = [
   { value: "desayuno", label: "Desayuno" },
@@ -12,9 +14,12 @@ const MEAL_TYPES = [
   { value: "snack", label: "Snack" },
 ];
 
-export default function AddRecipeForm() {
+export default function AddRecipeForm({ categories }: { categories: RecipeCategoryOption[] }) {
   const [name, setName] = useState("");
   const [mealType, setMealType] = useState("comida");
+  const [recipeCategoryId, setRecipeCategoryId] = useState(categories[0]?.id ?? "");
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [showNewCategory, setShowNewCategory] = useState(false);
   const [servings, setServings] = useState(4);
   const [instructions, setInstructions] = useState("");
   const [rows, setRows] = useState<IngredientRow[]>([{ productName: "", unit: "pza", quantity: 1 }]);
@@ -37,9 +42,18 @@ export default function AddRecipeForm() {
     setMessage(null);
     startTransition(async () => {
       try {
+        let categoryId = recipeCategoryId;
+        if (showNewCategory && newCategoryName.trim()) {
+          const fd = new FormData();
+          fd.set("name", newCategoryName.trim());
+          const created = await createRecipeCategory(fd);
+          categoryId = created.id;
+        }
+
         await addRecipe({
           name,
           mealType,
+          recipeCategoryId: categoryId || undefined,
           servings,
           instructions,
           ingredients: rows,
@@ -48,6 +62,8 @@ export default function AddRecipeForm() {
         setName("");
         setInstructions("");
         setRows([{ productName: "", unit: "pza", quantity: 1 }]);
+        setShowNewCategory(false);
+        setNewCategoryName("");
       } catch (err) {
         setMessage(err instanceof Error ? err.message : "Error al guardar la receta");
       }
@@ -55,7 +71,7 @@ export default function AddRecipeForm() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div id="agregar-receta" className="flex flex-col gap-3">
       <div className="grid gap-3 sm:grid-cols-3">
         <input
           value={name}
@@ -72,6 +88,46 @@ export default function AddRecipeForm() {
         </select>
       </div>
 
+      <div>
+        <label className="text-xs font-bold uppercase tracking-wide text-ink-soft">Categoría</label>
+        <div className="mt-1.5 flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => {
+                setRecipeCategoryId(cat.id);
+                setShowNewCategory(false);
+              }}
+              className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+                !showNewCategory && recipeCategoryId === cat.id
+                  ? "bg-mint text-white"
+                  : "border-2 border-black/10 bg-white text-ink"
+              }`}
+            >
+              {cat.emoji} {cat.name}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setShowNewCategory(true)}
+            className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
+              showNewCategory ? "bg-mint text-white" : "bg-mint-light text-mint-text"
+            }`}
+          >
+            + Nueva categoría
+          </button>
+        </div>
+        {showNewCategory && (
+          <input
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+            placeholder='Ej. "Cenas light"'
+            className="input mt-2"
+          />
+        )}
+      </div>
+
       <div className="flex items-center gap-2">
         <label className="text-sm font-semibold text-ink-soft">Porciones</label>
         <input
@@ -80,6 +136,7 @@ export default function AddRecipeForm() {
           onChange={(e) => setServings(Number(e.target.value))}
           className="input w-20"
         />
+        <span className="text-xs text-ink-soft">las escalamos solas al usarla en tu semana</span>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -123,7 +180,7 @@ export default function AddRecipeForm() {
         className="input"
       />
 
-      <button type="button" disabled={isPending} onClick={submit} className="btn-primary self-start">
+      <button type="button" disabled={isPending || !name.trim()} onClick={submit} className="btn-primary self-start">
         {isPending ? "Guardando..." : "Guardar receta"}
       </button>
 

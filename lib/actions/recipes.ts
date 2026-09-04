@@ -13,6 +13,7 @@ export type RecipeIngredientInput = {
 export type AddRecipeInput = {
   name: string;
   mealType?: string;
+  recipeCategoryId?: string;
   servings: number;
   instructions?: string;
   ingredients: RecipeIngredientInput[];
@@ -22,6 +23,9 @@ export type RecipeRecommendation = {
   id: string;
   name: string;
   mealType: string | null;
+  recipeCategoryId: string | null;
+  recipeCategoryName: string | null;
+  recipeCategoryEmoji: string | null;
   servings: number;
   instructions: string | null;
   source: string;
@@ -40,7 +44,7 @@ export async function getRecipeRecommendations(): Promise<RecipeRecommendation[]
   const [recipes, pantryItems, myUsageCounts] = await Promise.all([
     prisma.recipe.findMany({
       where: { OR: [{ userId: null }, { userId }] },
-      include: { ingredients: true },
+      include: { ingredients: true, recipeCategory: true },
     }),
     prisma.pantryItem.findMany({ where: { userId }, include: { product: true } }),
     prisma.mealPlanEntry.groupBy({
@@ -75,6 +79,9 @@ export async function getRecipeRecommendations(): Promise<RecipeRecommendation[]
       id: recipe.id,
       name: recipe.name,
       mealType: recipe.mealType,
+      recipeCategoryId: recipe.recipeCategoryId,
+      recipeCategoryName: recipe.recipeCategory?.name ?? null,
+      recipeCategoryEmoji: recipe.recipeCategory?.emoji ?? null,
       servings: recipe.servings,
       instructions: recipe.instructions,
       source: recipe.userId ? "user" : "seed",
@@ -112,6 +119,7 @@ export async function addRecipe(input: AddRecipeInput) {
       name: input.name.trim(),
       source: "user",
       mealType: input.mealType || undefined,
+      recipeCategoryId: input.recipeCategoryId || undefined,
       servings: input.servings > 0 ? input.servings : 4,
       instructions: input.instructions?.trim() || undefined,
       ingredients: {
@@ -162,7 +170,35 @@ export async function listAllRecipes() {
   const userId = await requireUserId();
   return prisma.recipe.findMany({
     where: { OR: [{ userId: null }, { userId }] },
-    include: { ingredients: true },
+    include: { ingredients: true, recipeCategory: true },
     orderBy: { name: "asc" },
   });
+}
+
+// Recetas que se pueden hacer (o casi) con una lista de ingredientes que el usuario escribe a
+// mano (ej. "huevo, leche, jitomate"), para el buscador por ingrediente del Recetario.
+export async function searchRecipesByIngredients(ingredientsText: string) {
+  const have = ingredientsText
+    .split(/[,\n]/)
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  if (have.length === 0) return [];
+
+  const recipes = await listAllRecipes();
+
+  return recipes
+    .map((recipe) => {
+      const missing = recipe.ingredients.filter(
+        (ing) => !have.some((h) => ing.name.toLowerCase().includes(h) || h.includes(ing.name.toLowerCase()))
+      );
+      return {
+        id: recipe.id,
+        name: recipe.name,
+        servings: recipe.servings,
+        totalCount: recipe.ingredients.length,
+        missing: missing.map((m) => m.name),
+      };
+    })
+    .filter((r) => r.totalCount > 0 && r.missing.length < r.totalCount)
+    .sort((a, b) => a.missing.length - b.missing.length);
 }

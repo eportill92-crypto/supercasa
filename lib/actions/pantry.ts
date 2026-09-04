@@ -18,6 +18,8 @@ export async function addPantryProduct(formData: FormData) {
   const name = String(formData.get("name") ?? "").trim();
   const unit = String(formData.get("unit") ?? "pza").trim() || "pza";
   const category = String(formData.get("category") ?? "").trim() || null;
+  const productCategoryId = String(formData.get("productCategoryId") ?? "").trim() || null;
+  const brand = String(formData.get("brand") ?? "").trim() || null;
   const quantity = Number(formData.get("quantity") ?? 0);
   const minThreshold = Number(formData.get("minThreshold") ?? 0);
   const targetQtyRaw = formData.get("targetQty");
@@ -27,8 +29,13 @@ export async function addPantryProduct(formData: FormData) {
 
   const product = await prisma.product.upsert({
     where: { userId_name: { userId, name } },
-    update: { unit, category: category ?? undefined },
-    create: { userId, name, unit, category },
+    update: {
+      unit,
+      category: category ?? undefined,
+      ...(productCategoryId ? { productCategoryId } : {}),
+      ...(brand ? { brand } : {}),
+    },
+    create: { userId, name, unit, category, productCategoryId, brand },
   });
 
   await prisma.pantryItem.upsert({
@@ -39,6 +46,7 @@ export async function addPantryProduct(formData: FormData) {
 
   revalidatePath("/inventario");
   revalidatePath("/lista-compra");
+  revalidatePath("/pedir-super");
   revalidatePath("/");
 }
 

@@ -37,6 +37,8 @@ model User {
   recipes           Recipe[]
   mealPlanEntries   MealPlanEntry[]
   automationLogs    AutomationLog[]
+  productCategories ProductCategory[]
+  recipeCategories  RecipeCategory[]
 }
 
 model Account {
@@ -82,7 +84,10 @@ model Product {
   userId     String
   name       String
   unit       String   @default("pza") // pza, kg, L, paquete, etc.
-  category   String?
+  category   String? // legado: texto libre de antes de productCategory — se conserva por compatibilidad, ya no se llena en altas nuevas
+  brand      String? // marca elegida (texto libre por ahora; catálogo formal de La Comer pendiente)
+  productCategoryId String?
+  productCategory   ProductCategory? @relation(fields: [productCategoryId], references: [id])
   lacomerUrl String? // URL del producto en lacomer.com.mx, para automatizar el carrito
   lacomerSku String?
   createdAt  DateTime @default(now())
@@ -91,6 +96,22 @@ model Product {
   orderItems        OrderItem[]
   usageEvents       UsageEvent[]
   shoppingListItem  ShoppingListItem[]
+
+  @@unique([userId, name])
+}
+
+// Categoría de producto (agrupa "Pedir el súper" y "Mi despensa"). userId nulo = categoría default
+// del sistema, visible para todos; con valor = categoría propia creada por ese usuario.
+model ProductCategory {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  name      String
+  emoji     String   @default("🛒")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  products Product[]
 
   @@unique([userId, name])
 }
@@ -206,14 +227,32 @@ model Recipe {
   userId       String?
   name         String
   source       String   @default("user") // seed | user
-  mealType     String? // desayuno | comida | cena | snack (sugerido, no obligatorio)
+  mealType     String? // desayuno | comida | cena | snack (sugerido, no obligatorio; usado por el menú semanal)
   servings     Int      @default(4) // porciones que rinden las cantidades de RecipeIngredient
   instructions String?
   timesUsed    Int      @default(0) // veces marcada como "preparada" (todos los usuarios)
   createdAt    DateTime @default(now())
+  recipeCategoryId String?
+  recipeCategory   RecipeCategory? @relation(fields: [recipeCategoryId], references: [id])
 
   ingredients     RecipeIngredient[]
   mealPlanEntries MealPlanEntry[]
+}
+
+// Categoría de receta para el Recetario (Desayunos, Comidas, Cenas, o dietas como "Antiinflamatorio").
+// userId nulo = categoría default del sistema; con valor = categoría propia (ej. "Cenas light").
+model RecipeCategory {
+  id        String   @id @default(cuid())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String?
+  name      String
+  emoji     String   @default("🍽️")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  recipes Recipe[]
+
+  @@unique([userId, name])
 }
 
 // Los ingredientes se guardan por nombre (no por Product) porque una receta del recetario

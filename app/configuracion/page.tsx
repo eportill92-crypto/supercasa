@@ -91,7 +91,7 @@ export default async function ConfiguracionPage() {
         </form>
       </section>
 
-      <section className="card">
+      <section id="credenciales" className="card scroll-mt-20">
         <h2 className="flex items-center gap-2 font-bold text-brand-text">
           <span>🔑</span> Credenciales de lacomer.com.mx
         </h2>

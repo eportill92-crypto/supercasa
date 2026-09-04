@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@/auth";
 import RegisterServiceWorker from "@/components/RegisterServiceWorker";
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
 // la app instalada) del azul de marca en vez del gris/blanco por default.
 export const viewport: Viewport = {
   colorScheme: "light",
-  themeColor: "#2563eb",
+  themeColor: "#26449e",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
@@ -50,8 +51,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <header className="sticky top-0 z-10 border-b border-black/5 bg-white/90 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
             <Link href="/" className="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-light text-base">
-                🛒
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                <Image src="/icon.png" alt="" width={32} height={32} />
               </span>
               <span>Super<span className="text-brand">Casa</span></span>
             </Link>

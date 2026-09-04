@@ -17,36 +17,37 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Paleta "colorida y divertida", con azul y verde como colores dominantes (brand + mint) y
-     grape/berry/sun como acentos ocasionales para variedad en badges. */
-  --color-cream: #f5faf9;
-  --color-ink: #1e293b;
-  --color-ink-soft: #64748b;
+  /* Paleta navy + oliva + crema, con un acento vino tinto — la misma que se revisó en el
+     wireframe (PDF) con el equipo antes de construir este flujo. grape es alias de brand
+     (mismo azul navy), ya que el wireframe no distingue entre ambos. */
+  --color-cream: #fffff4;
+  --color-ink: #1c2333;
+  --color-ink-soft: #5c6577;
 
-  --color-brand: #2563eb;
-  --color-brand-dark: #1d4ed8;
-  --color-brand-light: #dbeafe;
-  --color-brand-text: #1e40af;
+  --color-brand: #26449e;
+  --color-brand-dark: #1c3578;
+  --color-brand-light: #b7dbf1;
+  --color-brand-text: #1a2f6e;
 
-  --color-mint: #059669;
-  --color-mint-dark: #047857;
-  --color-mint-light: #d1fae5;
-  --color-mint-text: #065f46;
+  --color-mint: #b3c97e;
+  --color-mint-dark: #52922f;
+  --color-mint-light: #eef2dc;
+  --color-mint-text: #45591f;
 
-  --color-grape: #7c3aed;
-  --color-grape-dark: #6d28d9;
-  --color-grape-light: #ede9fe;
-  --color-grape-text: #5b21b6;
+  --color-grape: #26449e;
+  --color-grape-dark: #1c3578;
+  --color-grape-light: #b7dbf1;
+  --color-grape-text: #1a2f6e;
 
-  --color-berry: #db2777;
-  --color-berry-dark: #be185d;
-  --color-berry-light: #fce7f3;
-  --color-berry-text: #9d174d;
+  --color-berry: #7a1f10;
+  --color-berry-dark: #5c160c;
+  --color-berry-light: #f4ddd6;
+  --color-berry-text: #390400;
 
-  --color-sun: #d97706;
-  --color-sun-dark: #b45309;
-  --color-sun-light: #fef3c7;
-  --color-sun-text: #92400e;
+  --color-sun: #a8791f;
+  --color-sun-dark: #6b4d13;
+  --color-sun-light: #f3e8d1;
+  --color-sun-text: #6b4d13;
 }
 
 body {

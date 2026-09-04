@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
+import { auth } from "@/auth";
 import { listPantry } from "@/lib/actions/pantry";
 import { computeShoppingList } from "@/lib/actions/shopping-list";
 import { hasLacomerCredentials, getDefaultAddress } from "@/lib/actions/settings";
@@ -9,7 +10,8 @@ import { getMonday } from "@/lib/date-utils";
 
 export default async function Home() {
   const monday = getMonday(new Date());
-  const [pantry, shoppingList, { configured }, address, weekEntries] = await Promise.all([
+  const [session, pantry, shoppingList, { configured }, address, weekEntries] = await Promise.all([
+    auth(),
     listPantry(),
     computeShoppingList(),
     hasLacomerCredentials(),
@@ -17,23 +19,23 @@ export default async function Home() {
     getWeekMealPlan(monday),
   ]);
 
-  const lowStockCount = pantry.filter((p) => p.quantity <= p.minThreshold).length;
   const readyToAutomate = configured && !!address;
   const daysPlanned = new Set(weekEntries.map((e) => new Date(e.date).toDateString())).size;
+  const firstName = session?.user?.name?.split(" ")[0];
 
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-extrabold">Hola 👋</h1>
+        <h1 className="text-3xl font-extrabold">Hola{firstName ? `, ${firstName}` : ""} 👋</h1>
         <p className="mt-1 text-sm text-ink-soft">
           Así está tu despensa hoy, {new Date().toLocaleDateString("es-MX", { dateStyle: "long" })}.
         </p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <StatCard icon="🧺" label="Productos" value={pantry.length} color="brand" />
-        <StatCard icon="🛒" label="Faltantes" value={shoppingList.length} color={shoppingList.length > 0 ? "sun" : "mint"} />
-        <StatCard icon="📅" label="Días planeados" value={`${daysPlanned}/7`} color="brand" />
+      <div className="grid grid-cols-3 gap-3">
+        <StatCard label="Productos" value={pantry.length} />
+        <StatCard label="Faltantes" value={shoppingList.length} color={shoppingList.length > 0 ? "sun" : undefined} />
+        <StatCard label="Días planeados" value={`${daysPlanned}/7`} color="brand" />
       </div>
 
       <Link href="/inventario" className="-mt-4 flex items-center gap-1 text-sm font-bold text-brand">
@@ -59,7 +61,7 @@ export default async function Home() {
         <Link
           href="/pedir-super"
           className="rounded-3xl p-6 text-white shadow-lg transition hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg,#2563eb 0%,#1d4ed8 100%)" }}
+          style={{ background: "linear-gradient(135deg,#26449e 0%,#1c3578 100%)" }}
         >
           <div className="flex items-center justify-between">
             <span className="text-3xl">🛒</span>
@@ -81,7 +83,7 @@ export default async function Home() {
         <Link
           href="/menu-semanal"
           className="rounded-3xl p-6 text-white shadow-lg transition hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg,#059669 0%,#047857 100%)" }}
+          style={{ background: "linear-gradient(135deg,#52922f 0%,#2f5c1a 100%)" }}
         >
           <div className="flex items-center justify-between">
             <span className="text-3xl">📅</span>
@@ -102,30 +104,24 @@ export default async function Home() {
   );
 }
 
-const STAT_COLORS = {
-  brand: "border-brand/20 bg-brand-light/60 text-brand-text",
-  mint: "border-mint/20 bg-mint-light/60 text-mint-text",
-  sun: "border-sun/30 bg-sun-light/60 text-sun-text",
+const STAT_TEXT_COLORS = {
+  brand: "text-brand-text",
+  sun: "text-sun-text",
 } as const;
 
 function StatCard({
-  icon,
   label,
   value,
   color,
 }: {
-  icon: string;
   label: string;
   value: number | string;
-  color: keyof typeof STAT_COLORS;
+  color?: keyof typeof STAT_TEXT_COLORS;
 }) {
   return (
-    <div className={`flex flex-col items-center gap-1 rounded-2xl border p-4 text-center ${STAT_COLORS[color]}`}>
-      <span className="text-xl" aria-hidden>
-        {icon}
-      </span>
-      <div className="text-xl font-extrabold">{value}</div>
-      <div className="text-xs font-medium opacity-80">{label}</div>
+    <div className="card flex flex-col items-center gap-0.5 !p-3.5 text-center">
+      <div className={`text-xl font-extrabold ${color ? STAT_TEXT_COLORS[color] : ""}`}>{value}</div>
+      <div className="text-[11px] font-semibold text-ink-soft">{label}</div>
     </div>
   );
 }

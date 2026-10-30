@@ -76,8 +76,10 @@ export default function LandingPage() {
       className={`${fraunces.className} relative left-1/2 right-1/2 -mx-[50vw] w-screen px-6 sm:px-10 lg:px-16`}
     >
       <div className="mx-auto flex max-w-[1400px] flex-col gap-24 py-8">
-      {/* Hero */}
-      <section className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+      {/* Hero — llena casi toda la primera pantalla en vez de que la siguiente sección se
+          asome desde abajo, para que cada sección se sienta como su propio "cuadro" al hacer
+          scroll (como el sitio de referencia). */}
+      <section className="grid items-center gap-10 lg:min-h-[calc(100vh-7rem)] lg:grid-cols-2 lg:gap-16">
         <div className="flex flex-col gap-6">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-soft">
             Para tu casa

@@ -68,7 +68,13 @@ const FEATURES: { title: string; body: string; tone: Tone; icon: ReactNode }[] =
 
 export default function LandingPage() {
   return (
-    <div className={`${fraunces.className} flex flex-col gap-24 py-8`}>
+    // El <main> global de la app limita el ancho a max-w-5xl (pensado para el dashboard) —
+    // esto la saca de ese contenedor para usar el ancho real de la pantalla, con su propio
+    // máximo más generoso para pantallas grandes.
+    <div
+      className={`${fraunces.className} relative left-1/2 right-1/2 -mx-[50vw] w-screen px-6 sm:px-10 lg:px-16`}
+    >
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-24 py-8">
       {/* Hero */}
       <section className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <div className="flex flex-col gap-6">
@@ -159,6 +165,7 @@ export default function LandingPage() {
         </div>
         <div className="aspect-[4/3] w-full rounded-sm bg-sun-light" />
       </section>
+      </div>
     </div>
   );
 }

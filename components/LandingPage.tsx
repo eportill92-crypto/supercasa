@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { Fraunces } from "next/font/google";
 
@@ -108,13 +109,15 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className="relative aspect-[4/3] w-full overflow-hidden rounded-sm bg-mint-dark">
-          <div className="absolute inset-0 flex items-center justify-center">
-            <IconBasket className="h-24 w-24 text-mint-light/90" strokeWidth={1} />
-          </div>
-          <span className="absolute bottom-5 left-5 font-sans text-xs font-semibold uppercase tracking-[0.2em] text-cream/80">
-            SuperCasa
-          </span>
+        <div className="overflow-hidden rounded-sm border border-black/10 shadow-xl shadow-black/5">
+          <Image
+            src="/landing-screenshot.png"
+            alt="Pantalla de inicio de SuperCasa, con el resumen de la despensa y los accesos a Pedir el súper y Planear tu semana"
+            width={1400}
+            height={780}
+            className="h-auto w-full"
+            priority
+          />
         </div>
       </section>
 

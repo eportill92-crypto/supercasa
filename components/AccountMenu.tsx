@@ -106,9 +106,9 @@ export default function AccountMenu({ name, email }: { name: string | null; emai
         type="button"
         aria-label="Abrir menú de cuenta"
         onClick={() => setOpen(true)}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm transition hover:bg-black/5"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-black/10 bg-white shadow-sm transition hover:bg-black/5"
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1e293b" strokeWidth="2.2" strokeLinecap="round">
           <path d="M4 7h16M4 12h16M4 17h16" />
         </svg>
       </button>

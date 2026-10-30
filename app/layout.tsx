@@ -49,10 +49,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col bg-cream text-ink">
         <RegisterServiceWorker />
         <header className="sticky top-0 z-10 border-b border-black/5 bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-            <Link href="/" className="flex shrink-0 items-center gap-2 text-lg font-extrabold tracking-tight">
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full">
-                <Image src="/icon.png" alt="" width={32} height={32} />
+          <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-4 px-6 py-4 sm:px-10 lg:px-16">
+            <Link href="/" className="flex shrink-0 items-center gap-2.5 text-2xl font-extrabold tracking-tight">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full">
+                <Image src="/icon.png" alt="" width={40} height={40} />
               </span>
               <span>Super<span className="text-brand">Casa</span></span>
             </Link>
@@ -60,7 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               {session?.user ? (
                 <AccountMenu name={session.user.name ?? null} email={session.user.email ?? ""} />
               ) : (
-                <Link href="/login" className="btn-primary">
+                <Link href="/login" className="btn-primary !px-6 !py-3 !text-base">
                   Acceso
                 </Link>
               )}

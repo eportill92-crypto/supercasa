@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "SuperCasa",
-  description: "Inventario de despensa y pedidos automáticos a La Comer",
+  description: "Inventario de despensa, lista de compra y pedidos automáticos a tu supermercado.",
   appleWebApp: {
     // Le dice a iOS que al agregarla a pantalla de inicio abra en modo app (sin la barra del
     // navegador) en vez de como un simple acceso directo a Safari.
@@ -60,21 +60,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               {session?.user ? (
                 <AccountMenu name={session.user.name ?? null} email={session.user.email ?? ""} />
               ) : (
-                <>
-                  <Link href="/login" className="btn-ghost">
-                    Iniciar sesión
-                  </Link>
-                  <Link href="/registro" className="btn-primary">
-                    Crear cuenta
-                  </Link>
-                </>
+                <Link href="/login" className="btn-primary">
+                  Acceso
+                </Link>
               )}
             </div>
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6">{children}</main>
         <footer className="border-t border-black/5 py-6 text-center text-xs text-ink-soft">
-          🛒 SuperCasa — inventario y pedidos automáticos para lacomer.com.mx
+          🛒 SuperCasa — inventario y pedidos automáticos para tu supermercado
         </footer>
       </body>
     </html>

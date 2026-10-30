@@ -7,11 +7,16 @@ import { computeShoppingList } from "@/lib/actions/shopping-list";
 import { hasLacomerCredentials, getDefaultAddress } from "@/lib/actions/settings";
 import { getWeekMealPlan } from "@/lib/actions/meal-plan";
 import { getMonday } from "@/lib/date-utils";
+import LandingPage from "@/components/LandingPage";
 
 export default async function Home() {
+  const session = await auth();
+  if (!session?.user) {
+    return <LandingPage />;
+  }
+
   const monday = getMonday(new Date());
-  const [session, pantry, shoppingList, { configured }, address, weekEntries] = await Promise.all([
-    auth(),
+  const [pantry, shoppingList, { configured }, address, weekEntries] = await Promise.all([
     listPantry(),
     computeShoppingList(),
     hasLacomerCredentials(),

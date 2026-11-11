@@ -216,7 +216,11 @@ function FeatureTile({ feature }: { feature: Feature }) {
   // si compartieran el mismo aspecto 4:3, al doble de ancho saldrían el doble de altas,
   // rompiendo el ritmo del grid.
   const wideClasses = feature.wide ? "sm:col-span-2 lg:col-span-2" : "";
-  const aspectClass = feature.wide ? "aspect-[16/9] lg:aspect-[2/1]" : "aspect-[4/3]";
+  // Las angostas no fijan su propio aspect-ratio: así se estiran (align-items: stretch, el
+  // default del grid) a la altura de la ancha con la que comparten fila en vez de verse más
+  // chaparras. En sm (2 columnas) donde una angosta puede caer sola o junto a otra angosta,
+  // esto no afecta — ahí la altura la da el contenido, igual entre ellas.
+  const aspectClass = feature.wide ? "aspect-[16/9] lg:aspect-[2/1]" : "";
 
   // Con captura real de la app: la pantalla es el fondo de la tarjeta (en vez del
   // ícono+color plano), con el título/descripción sobre un degradado al pie, estilo

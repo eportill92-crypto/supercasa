@@ -34,7 +34,7 @@ export default function LandingPage() {
       {/* Hero — fondo propio (degradado azul de marca + resplandor difuminado) que se sale del
           ancho del contenido para distinguirse como su propio bloque, en vez de vivir sobre el
           crema del resto de la página. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-20 sm:px-10 lg:px-16 lg:py-28">
+      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint-dark opacity-20 blur-[110px]"
@@ -43,12 +43,15 @@ export default function LandingPage() {
           aria-hidden
           className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
         />
-        <div className="relative mx-auto grid max-w-[1400px] items-center gap-14 lg:min-h-[calc(100vh-14rem)] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-          <div className="flex flex-col gap-7">
+        {/* min-h más chico y tipografía/espaciado más compactos que antes: con el headline a
+            5.5rem + py-28 el hero medía más que una pantalla completa en monitores de menor
+            altura, tapando los botones de "Crear cuenta"/"Ya tengo cuenta" fuera de la vista. */}
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:min-h-[calc(100vh-8rem)] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div className="flex flex-col gap-5">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
               Para tu casa
             </span>
-            <h1 className="text-6xl leading-[0.98] font-medium tracking-tight text-cream sm:text-7xl lg:text-[5.5rem]">
+            <h1 className="text-5xl leading-[0.98] font-medium tracking-tight text-cream sm:text-6xl lg:text-7xl">
               Tu despensa,
               <br />
               tu súper y tu semana,
@@ -59,7 +62,7 @@ export default function LandingPage() {
               SuperCasa lleva el control de lo que tienes en casa, te ayuda a planear qué van a
               comer y arma el pedido del súper por ti — todo en un solo lugar.
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-6">
+            <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
                 className="inline-flex items-center justify-center rounded-full bg-cream px-7 py-3 text-sm font-semibold text-brand-dark shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-white"
@@ -98,11 +101,7 @@ export default function LandingPage() {
         {/* Features — cada fila usa el ancho real de sus dos recortes como proporción de
             columnas, para que ambos lados compartan la misma altura sin recortar nada de la
             imagen (el texto y el logo ya vienen incluidos en cada captura). */}
-        {/* Ancho más angosto que el resto de la página a propósito, y centrado (no solo el
-              título) para que se vea como una columna intencional y no como espacio sobrante a
-              un lado: con el ancho completo (1400px) las 3 filas salían demasiado altas para
-              caber en una pantalla normal al 100% de zoom. */}
-        <section className="mx-auto max-w-[1300px]">
+        <section>
           <h2 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
             Todo lo que hace por ti
           </h2>

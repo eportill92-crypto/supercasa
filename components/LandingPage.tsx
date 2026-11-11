@@ -43,10 +43,9 @@ export default function LandingPage() {
           aria-hidden
           className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
         />
-        {/* min-h más chico y tipografía/espaciado más compactos que antes: con el headline a
-            5.5rem + py-28 el hero medía más que una pantalla completa en monitores de menor
-            altura, tapando los botones de "Crear cuenta"/"Ya tengo cuenta" fuera de la vista. */}
-        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:min-h-[calc(100vh-8rem)] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+        {/* Hero compacto (sin min-height ligado al viewport) — a petición del usuario, siguiendo
+            una referencia de diseño más corta y directa en vez de ocupar la pantalla completa. */}
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
           <div className="flex flex-col gap-5">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
               Para tu casa
@@ -101,7 +100,7 @@ export default function LandingPage() {
         {/* Features — cada fila usa el ancho real de sus dos recortes como proporción de
             columnas, para que ambos lados compartan la misma altura sin recortar nada de la
             imagen (el texto y el logo ya vienen incluidos en cada captura). */}
-        <section>
+        <section id="funcionalidades">
           <h2 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
             Todo lo que hace por ti
           </h2>
@@ -157,18 +156,23 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA final, dos columnas */}
-        <section className="grid items-center gap-14 border-t border-black/10 pt-16 lg:grid-cols-2 lg:gap-16">
+        {/* CTA final — tarjeta con fondo verde suave y lista de beneficios en vez del párrafo
+            único de antes, a petición del usuario. */}
+        <section className="grid items-center gap-10 rounded-sm bg-mint-light p-10 lg:grid-cols-2 lg:gap-16 lg:p-14">
           <div className="flex flex-col gap-5">
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft">
-              Únete a SuperCasa
-            </span>
-            <h2 className="text-5xl font-medium leading-[1.02] tracking-tight text-ink">
+            <h2 className="text-4xl font-medium leading-[1.05] tracking-tight text-ink sm:text-5xl">
               ¿Le damos una organizada a tu casa?
             </h2>
-            <p className="max-w-sm text-[15px] text-ink-soft">
-              Crear tu cuenta toma un minuto y es gratis.
-            </p>
+            <ul className="flex flex-col gap-2.5 text-[15px] text-ink">
+              {["Controla lo que tienes", "Planea tus comidas", "Ahorra tiempo en el súper"].map((item) => (
+                <li key={item} className="flex items-center gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mint-dark text-xs text-cream">
+                    ✓
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
             <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
@@ -184,12 +188,12 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
+          <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_20px_50px_-20px_rgba(28,35,51,0.4)]">
             <Image
-              src="/landing-cta-laptop.png"
-              alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
-              width={1100}
-              height={662}
+              src="/landing-despensa-foto.png"
+              alt="Repisa con despensa organizada: frascos de pasta, granola y especias, con una canasta de cebollas y ajo abajo"
+              width={595}
+              height={296}
               className="h-auto w-full"
             />
           </div>

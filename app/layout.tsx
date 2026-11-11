@@ -56,13 +56,18 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               </span>
               <span>Super<span className="text-brand">Casa</span></span>
             </Link>
-            <div className="flex shrink-0 items-center gap-3 text-sm">
+            <div className="flex shrink-0 items-center gap-6 text-sm">
               {session?.user ? (
                 <AccountMenu name={session.user.name ?? null} email={session.user.email ?? ""} />
               ) : (
-                <Link href="/login" className="btn-primary !px-6 !py-3 !text-base">
-                  Acceso
-                </Link>
+                <>
+                  <Link href="/#funcionalidades" className="hidden font-semibold text-ink-soft hover:text-ink sm:inline">
+                    Funcionalidades
+                  </Link>
+                  <Link href="/login" className="btn-primary !px-6 !py-3 !text-base">
+                    Acceso
+                  </Link>
+                </>
               )}
             </div>
           </div>

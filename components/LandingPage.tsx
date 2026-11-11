@@ -203,7 +203,7 @@ export default function LandingPage() {
           </div>
           <div className="relative">
             <div aria-hidden className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-ink sm:-right-6 sm:-bottom-6" />
-            <div className="relative aspect-[4/3] w-full rounded-sm bg-sun-light shadow-[0_30px_60px_-24px_rgba(28,35,51,0.3)]" />
+            <div className="relative aspect-[4/3] w-full rounded-sm bg-sun-light shadow-[0_30px_60px_-24px_rgba(28,35,51,0.3)] lg:aspect-auto lg:h-[320px]" />
           </div>
         </section>
       </div>
@@ -220,7 +220,10 @@ function FeatureTile({ feature }: { feature: Feature }) {
   // default del grid) a la altura de la ancha con la que comparten fila en vez de verse más
   // chaparras. En sm (2 columnas) donde una angosta puede caer sola o junto a otra angosta,
   // esto no afecta — ahí la altura la da el contenido, igual entre ellas.
-  const aspectClass = feature.wide ? "aspect-[16/9] lg:aspect-[2/1]" : "";
+  // En lg, en vez de aspect-ratio (que con el doble de ancho salía larguísima, 663px+, y
+  // dejaba ver apenas fila y media de la cuadrícula en una pantalla normal al 100% de zoom),
+  // se fija una altura máxima pensada para la pantalla real en vez del ancho de la tarjeta.
+  const aspectClass = feature.wide ? "aspect-[16/9] lg:aspect-auto lg:h-[320px]" : "";
 
   // Con captura real de la app: la pantalla es el fondo de la tarjeta (en vez del
   // ícono+color plano), con el título/descripción sobre un degradado al pie, estilo

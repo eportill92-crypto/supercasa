@@ -280,3 +280,15 @@ model MealPlanEntry {
   prepared   Boolean   @default(false)
   preparedAt DateTime?
 }
+
+// Alguien que dejó sus datos en el formulario de contacto de la página informativa (sin
+// cuenta todavía). notifiedAt queda null si el correo de aviso no está configurado o falló —
+// el registro se guarda siempre aunque el aviso no se pueda mandar.
+model LandingLead {
+  id         String    @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  createdAt  DateTime  @default(now())
+  notifiedAt DateTime?
+}

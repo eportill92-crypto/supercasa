@@ -84,10 +84,10 @@ export default function LandingPage() {
             />
             <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
               <Image
-                src="/landing-screenshot.png"
-                alt="Pantalla de inicio de SuperCasa, con el resumen de la despensa y los accesos a Pedir el súper y Planear tu semana"
-                width={1400}
-                height={780}
+                src="/landing-cta-laptop.png"
+                alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
+                width={1100}
+                height={662}
                 className="h-auto w-full"
                 priority
               />

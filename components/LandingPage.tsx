@@ -28,18 +28,29 @@ const TONE_FG: Record<Tone, string> = {
   ink: "text-cream",
 };
 
-const FEATURES: { title: string; body: string; tone: Tone; Icon: ComponentType<{ className?: string; strokeWidth?: number }> }[] = [
+type Feature = {
+  title: string;
+  body: string;
+  tone: Tone;
+  Icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  wide?: boolean;
+  image?: string;
+};
+
+const FEATURES: Feature[] = [
   {
     title: "Mi despensa",
     body: "Lo que tienes en casa, agrupado por categoría, con aviso de qué se está acabando.",
     tone: "sand",
     Icon: IconBasket,
+    wide: true,
   },
   {
     title: "Pedir el súper",
     body: "Arma tu pedido por categoría, con lo que ya sabes que compras seguido.",
     tone: "sage",
     Icon: IconCart,
+    image: "/landing-pedir-super.png",
   },
   {
     title: "Mi lista",
@@ -52,12 +63,14 @@ const FEATURES: { title: string; body: string; tone: Tone; Icon: ComponentType<{
     body: "Desayuno, comida, cena y snacks — la lista de compra se arma sola.",
     tone: "ink",
     Icon: IconCalendar,
+    wide: true,
   },
   {
     title: "Recetario",
     body: "Tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti.",
     tone: "sky",
     Icon: IconBook,
+    wide: true,
   },
   {
     title: "Pedidos automáticos",
@@ -78,146 +91,179 @@ export default function LandingPage() {
     // El <main> global de la app limita el ancho a max-w-5xl (pensado para el dashboard) —
     // esto la saca de ese contenedor para usar el ancho real de la pantalla, con su propio
     // máximo más generoso para pantallas grandes.
-    <div
-      className={`${fraunces.className} relative left-1/2 right-1/2 -mx-[50vw] w-screen px-6 sm:px-10 lg:px-16`}
-    >
+    <div className={`${fraunces.className} relative left-1/2 right-1/2 -mx-[50vw] w-screen`}>
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-10 opacity-[0.035] mix-blend-overlay"
         style={{ backgroundImage: `url("${GRAIN_URL}")` }}
       />
-      <div className="relative mx-auto flex max-w-[1400px] flex-col gap-28 py-8">
-      {/* Hero — llena casi toda la primera pantalla en vez de que la siguiente sección se
-          asome desde abajo, para que cada sección se sienta como su propio "cuadro" al hacer
-          scroll (como el sitio de referencia). */}
-      <section className="grid items-center gap-14 lg:min-h-[calc(100vh-7rem)] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-        <div className="flex flex-col gap-7">
-          <span className="text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft">
-            Para tu casa
-          </span>
-          <h1 className="text-6xl leading-[0.98] font-medium tracking-tight text-ink sm:text-7xl lg:text-[5.5rem]">
-            Tu despensa,
-            <br />
-            tu súper y tu semana,
-            <br />
-            <em className="italic text-mint-dark">organizados solos.</em>
-          </h1>
-          <p className="max-w-sm font-sans text-[15px] leading-relaxed text-ink-soft">
-            SuperCasa lleva el control de lo que tienes en casa, te ayuda a planear qué van a
-            comer y arma el pedido del súper por ti — todo en un solo lugar.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-6 font-sans">
-            <Link
-              href="/registro"
-              className="inline-flex items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-cream shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:bg-black hover:shadow-[0_1px_2px_rgba(0,0,0,0.1),0_14px_28px_-8px_rgba(0,0,0,0.4)]"
-            >
-              Crear cuenta gratis
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm font-semibold uppercase tracking-wide text-ink underline underline-offset-4"
-            >
-              Ya tengo cuenta
-            </Link>
-          </div>
-        </div>
 
-        <div className="relative">
-          <div
-            aria-hidden
-            className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-mint-dark sm:-right-6 sm:-bottom-6"
-          />
-          <div className="relative overflow-hidden rounded-sm border border-black/10 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_30px_60px_-20px_rgba(28,35,51,0.35)]">
-            <Image
-              src="/landing-screenshot.png"
-              alt="Pantalla de inicio de SuperCasa, con el resumen de la despensa y los accesos a Pedir el súper y Planear tu semana"
-              width={1400}
-              height={780}
-              className="h-auto w-full"
-              priority
+      {/* Hero — fondo propio (degradado azul de marca + resplandor difuminado) que se sale del
+          ancho del contenido para distinguirse como su propio bloque, en vez de vivir sobre el
+          crema del resto de la página. */}
+      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-20 sm:px-10 lg:px-16 lg:py-28">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint opacity-20 blur-[110px]"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
+        />
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-14 lg:min-h-[calc(100vh-14rem)] lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div className="flex flex-col gap-7">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
+              Para tu casa
+            </span>
+            <h1 className="text-6xl leading-[0.98] font-medium tracking-tight text-cream sm:text-7xl lg:text-[5.5rem]">
+              Tu despensa,
+              <br />
+              tu súper y tu semana,
+              <br />
+              <em className="italic text-mint">organizados solos.</em>
+            </h1>
+            <p className="max-w-sm font-sans text-[15px] leading-relaxed text-cream/70">
+              SuperCasa lleva el control de lo que tienes en casa, te ayuda a planear qué van a
+              comer y arma el pedido del súper por ti — todo en un solo lugar.
+            </p>
+            <div className="mt-3 flex flex-wrap items-center gap-6 font-sans">
+              <Link
+                href="/registro"
+                className="inline-flex items-center justify-center rounded-full bg-cream px-7 py-3 text-sm font-semibold text-brand-dark shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-white"
+              >
+                Crear cuenta gratis
+              </Link>
+              <Link
+                href="/login"
+                className="text-sm font-semibold uppercase tracking-wide text-cream underline underline-offset-4"
+              >
+                Ya tengo cuenta
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div
+              aria-hidden
+              className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-mint sm:-right-6 sm:-bottom-6"
             />
+            <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
+              <Image
+                src="/landing-screenshot.png"
+                alt="Pantalla de inicio de SuperCasa, con el resumen de la despensa y los accesos a Pedir el súper y Planear tu semana"
+                width={1400}
+                height={780}
+                className="h-auto w-full"
+                priority
+              />
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features — grid tipo "bento" asimétrico en vez de tarjetas uniformes */}
-      <section>
-        <h2 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
-          Todo lo que hace por ti
-        </h2>
-        <div className="mt-12 grid auto-rows-[minmax(14rem,auto)] gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {FEATURES.map((f, i) => (
-            <FeatureTile key={f.title} feature={f} featured={i === 0} />
-          ))}
-        </div>
-      </section>
-
-      {/* CTA final, dos columnas */}
-      <section className="grid items-center gap-14 border-t border-black/10 pt-16 lg:grid-cols-2 lg:gap-16">
-        <div className="flex flex-col gap-5">
-          <span className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft">
-            Únete a SuperCasa
-          </span>
-          <h2 className="text-5xl font-medium leading-[1.02] tracking-tight text-ink">
-            ¿Le damos una organizada a tu casa?
+      <div className="relative mx-auto flex max-w-[1400px] flex-col gap-28 px-6 py-8 sm:px-10 lg:px-16">
+        {/* Features — grid tipo "bento" asimétrico en vez de tarjetas uniformes */}
+        <section>
+          <h2 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
+            Todo lo que hace por ti
           </h2>
-          <p className="max-w-sm font-sans text-[15px] text-ink-soft">
-            Crear tu cuenta toma un minuto y es gratis.
-          </p>
-          <div className="mt-2 flex flex-wrap items-center gap-6 font-sans">
-            <Link
-              href="/registro"
-              className="inline-flex items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-cream shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:bg-black"
-            >
-              Empezar ahora
-            </Link>
-            <Link
-              href="/login"
-              className="text-sm font-semibold uppercase tracking-wide text-ink underline underline-offset-4"
-            >
-              Ya tengo cuenta
-            </Link>
+          <div className="mt-12 grid grid-flow-row-dense gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {FEATURES.map((f) => (
+              <FeatureTile key={f.title} feature={f} />
+            ))}
           </div>
-        </div>
-        <div className="relative">
-          <div aria-hidden className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-ink sm:-right-6 sm:-bottom-6" />
-          <div className="relative aspect-[4/3] w-full rounded-sm bg-sun-light shadow-[0_30px_60px_-24px_rgba(28,35,51,0.3)]" />
-        </div>
-      </section>
+        </section>
+
+        {/* CTA final, dos columnas */}
+        <section className="grid items-center gap-14 border-t border-black/10 pt-16 lg:grid-cols-2 lg:gap-16">
+          <div className="flex flex-col gap-5">
+            <span className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft">
+              Únete a SuperCasa
+            </span>
+            <h2 className="text-5xl font-medium leading-[1.02] tracking-tight text-ink">
+              ¿Le damos una organizada a tu casa?
+            </h2>
+            <p className="max-w-sm font-sans text-[15px] text-ink-soft">
+              Crear tu cuenta toma un minuto y es gratis.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-6 font-sans">
+              <Link
+                href="/registro"
+                className="inline-flex items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-cream shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:bg-black"
+              >
+                Empezar ahora
+              </Link>
+              <Link
+                href="/login"
+                className="text-sm font-semibold uppercase tracking-wide text-ink underline underline-offset-4"
+              >
+                Ya tengo cuenta
+              </Link>
+            </div>
+          </div>
+          <div className="relative">
+            <div aria-hidden className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-ink sm:-right-6 sm:-bottom-6" />
+            <div className="relative aspect-[4/3] w-full rounded-sm bg-sun-light shadow-[0_30px_60px_-24px_rgba(28,35,51,0.3)]" />
+          </div>
+        </section>
       </div>
     </div>
   );
 }
 
-function FeatureTile({
-  feature,
-  featured,
-}: {
-  feature: { title: string; body: string; tone: Tone; Icon: ComponentType<{ className?: string; strokeWidth?: number }> };
-  featured: boolean;
-}) {
+function FeatureTile({ feature }: { feature: Feature }) {
+  // Las tarjetas anchas (2 columnas) usan un aspecto más panorámico que las normales —
+  // si compartieran el mismo aspecto 4:3, al doble de ancho saldrían el doble de altas,
+  // rompiendo el ritmo del grid.
+  const wideClasses = feature.wide ? "sm:col-span-2 lg:col-span-2" : "";
+  const aspectClass = feature.wide ? "aspect-[16/9] lg:aspect-[2/1]" : "aspect-[4/3]";
+
+  // Con captura real de la app: la pantalla es el fondo de la tarjeta (en vez del
+  // ícono+color plano), con el título/descripción sobre un degradado al pie, estilo
+  // "tarjeta con foto" — necesita más ancho para que el detalle de la captura se lea.
+  if (feature.image) {
+    return (
+      <div className={`group relative overflow-hidden rounded-sm ${aspectClass} ${wideClasses}`}>
+        <Image
+          src={feature.image}
+          alt={`Captura de la pantalla "${feature.title}" en SuperCasa`}
+          width={1400}
+          height={760}
+          className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.03]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-7 lg:p-10">
+          <h3 className="font-sans text-sm font-bold uppercase tracking-[0.15em] text-cream">
+            {feature.title}
+          </h3>
+          <p className="font-sans text-base leading-relaxed text-cream/85">{feature.body}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`group flex flex-col gap-4 rounded-sm p-7 transition hover:-translate-y-1 ${TONE_BG[feature.tone]} ${
-        featured ? "sm:col-span-2 lg:col-span-2 lg:p-10" : ""
+      className={`group flex flex-col gap-4 rounded-sm p-7 transition hover:-translate-y-1 ${TONE_BG[feature.tone]} ${aspectClass} ${
+        feature.wide ? `${wideClasses} lg:p-10` : ""
       }`}
     >
       <feature.Icon
         className={`shrink-0 ${TONE_FG[feature.tone]} transition-transform duration-200 group-hover:scale-110 ${
-          featured ? "h-14 w-14" : "h-9 w-9"
+          feature.wide ? "h-14 w-14" : "h-9 w-9"
         }`}
       />
       <div className="mt-auto flex flex-col gap-2">
         <h3
           className={`font-sans font-bold uppercase tracking-[0.15em] ${TONE_FG[feature.tone]} ${
-            featured ? "text-sm" : "text-xs"
+            feature.wide ? "text-sm" : "text-xs"
           }`}
         >
           {feature.title}
         </h3>
         <p
           className={`font-sans leading-relaxed ${TONE_FG[feature.tone]} opacity-80 ${
-            featured ? "max-w-sm text-base" : "text-sm"
+            feature.wide ? "max-w-sm text-base" : "text-sm"
           }`}
         >
           {feature.body}

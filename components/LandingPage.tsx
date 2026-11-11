@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { ComponentType } from "react";
 import { Fraunces } from "next/font/google";
 
 // Serif editorial, solo para esta página — el resto de la app sigue con Geist (sans) como
@@ -11,74 +10,6 @@ const fraunces = Fraunces({
   weight: ["400", "500", "600"],
   style: ["normal", "italic"],
 });
-
-type Tone = "sand" | "sage" | "sky" | "ink";
-
-const TONE_BG: Record<Tone, string> = {
-  sand: "bg-sun-light",
-  sage: "bg-mint-dark",
-  sky: "bg-brand-light",
-  ink: "bg-ink",
-};
-
-const TONE_FG: Record<Tone, string> = {
-  sand: "text-ink",
-  sage: "text-cream",
-  sky: "text-ink",
-  ink: "text-cream",
-};
-
-type Feature = {
-  title: string;
-  body: string;
-  tone: Tone;
-  Icon: ComponentType<{ className?: string; strokeWidth?: number }>;
-  wide?: boolean;
-  image?: string;
-};
-
-const FEATURES: Feature[] = [
-  {
-    title: "Mi despensa",
-    body: "Lo que tienes en casa, agrupado por categoría, con aviso de qué se está acabando.",
-    tone: "sand",
-    Icon: IconBasket,
-    wide: true,
-  },
-  {
-    title: "Pedir el súper",
-    body: "Arma tu pedido por categoría, con lo que ya sabes que compras seguido.",
-    tone: "sage",
-    Icon: IconCart,
-    image: "/landing-pedir-super.png",
-  },
-  {
-    title: "Mi lista",
-    body: "Una sola lista para comida, limpieza, higiene y lo que se te ocurra.",
-    tone: "sky",
-    Icon: IconList,
-  },
-  {
-    title: "Planear tu semana",
-    body: "Desayuno, comida, cena y snacks — la lista de compra se arma sola.",
-    tone: "ink",
-    Icon: IconCalendar,
-    wide: true,
-  },
-  {
-    title: "Recetario",
-    body: "Tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti.",
-    tone: "sky",
-    Icon: IconBook,
-    wide: true,
-  },
-  {
-    title: "Pedidos automáticos",
-    body: "Conecta tu cuenta del súper y deja que el pedido se arme solo.",
-    tone: "sand",
-    Icon: IconAuto,
-  },
-];
 
 // Grano sutil (SVG feTurbulence) superpuesto a toda la página — la textura plana de los
 // bloques de color se sentía "de maqueta"; esto le da algo de profundidad táctil sin
@@ -122,11 +53,11 @@ export default function LandingPage() {
               <br />
               <em className="italic text-mint">organizados solos.</em>
             </h1>
-            <p className="max-w-sm font-sans text-[15px] leading-relaxed text-cream/70">
+            <p className="max-w-sm text-[15px] leading-relaxed text-cream/70">
               SuperCasa lleva el control de lo que tienes en casa, te ayuda a planear qué van a
               comer y arma el pedido del súper por ti — todo en un solo lugar.
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-6 font-sans">
+            <div className="mt-3 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
                 className="inline-flex items-center justify-center rounded-full bg-cream px-7 py-3 text-sm font-semibold text-brand-dark shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-white"
@@ -162,31 +93,78 @@ export default function LandingPage() {
       </section>
 
       <div className="relative mx-auto flex max-w-[1400px] flex-col gap-28 px-6 py-8 sm:px-10 lg:px-16">
-        {/* Features — grid tipo "bento" asimétrico en vez de tarjetas uniformes */}
+        {/* Features — cada fila usa el ancho real de sus dos recortes como proporción de
+            columnas, para que ambos lados compartan la misma altura sin recortar nada de la
+            imagen (el texto y el logo ya vienen incluidos en cada captura). */}
         <section>
           <h2 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
             Todo lo que hace por ti
           </h2>
-          <div className="mt-12 grid grid-flow-row-dense gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <FeatureTile key={f.title} feature={f} />
-            ))}
+          <div className="mt-12 flex flex-col gap-5">
+            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:1055fr_611fr]">
+              <Image
+                src="/landing-despensa.png"
+                alt="Mi despensa: lo que tienes en casa, agrupado por categoría, con aviso de qué se está acabando."
+                width={1055}
+                height={296}
+                className="h-auto w-full rounded-sm"
+              />
+              <Image
+                src="/landing-pedir-super.png"
+                alt="Pedir el súper: arma tu pedido por categoría, con lo que ya sabes que compras seguido."
+                width={611}
+                height={296}
+                className="h-auto w-full rounded-sm"
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:570fr_1101fr]">
+              <Image
+                src="/landing-mi-lista.png"
+                alt="Mi lista: una sola lista para comida, limpieza, higiene y lo que se te ocurra."
+                width={570}
+                height={271}
+                className="h-auto w-full rounded-sm"
+              />
+              <Image
+                src="/landing-planear-semana.png"
+                alt="Planear tu semana: desayuno, comida, cena y snacks — la lista de compra se arma sola."
+                width={1101}
+                height={271}
+                className="h-auto w-full rounded-sm"
+              />
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:985fr_681fr]">
+              <Image
+                src="/landing-recetario.png"
+                alt="Recetario: tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti."
+                width={985}
+                height={264}
+                className="h-auto w-full rounded-sm"
+              />
+              <Image
+                src="/landing-pedidos-auto.png"
+                alt="Pedidos automáticos: conecta tu cuenta del súper y deja que el pedido se arme solo."
+                width={681}
+                height={264}
+                className="h-auto w-full rounded-sm"
+              />
+            </div>
           </div>
         </section>
 
         {/* CTA final, dos columnas */}
         <section className="grid items-center gap-14 border-t border-black/10 pt-16 lg:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-5">
-            <span className="font-sans text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft">
+            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft">
               Únete a SuperCasa
             </span>
             <h2 className="text-5xl font-medium leading-[1.02] tracking-tight text-ink">
               ¿Le damos una organizada a tu casa?
             </h2>
-            <p className="max-w-sm font-sans text-[15px] text-ink-soft">
+            <p className="max-w-sm text-[15px] text-ink-soft">
               Crear tu cuenta toma un minuto y es gratis.
             </p>
-            <div className="mt-2 flex flex-wrap items-center gap-6 font-sans">
+            <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
                 className="inline-flex items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-cream shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:bg-black"
@@ -208,135 +186,5 @@ export default function LandingPage() {
         </section>
       </div>
     </div>
-  );
-}
-
-function FeatureTile({ feature }: { feature: Feature }) {
-  // Las tarjetas anchas (2 columnas) usan un aspecto más panorámico que las normales —
-  // si compartieran el mismo aspecto 4:3, al doble de ancho saldrían el doble de altas,
-  // rompiendo el ritmo del grid.
-  const wideClasses = feature.wide ? "sm:col-span-2 lg:col-span-2" : "";
-  // Las angostas no fijan su propio aspect-ratio: así se estiran (align-items: stretch, el
-  // default del grid) a la altura de la ancha con la que comparten fila en vez de verse más
-  // chaparras. En sm (2 columnas) donde una angosta puede caer sola o junto a otra angosta,
-  // esto no afecta — ahí la altura la da el contenido, igual entre ellas.
-  // En lg, en vez de aspect-ratio (que con el doble de ancho salía larguísima, 663px+, y
-  // dejaba ver apenas fila y media de la cuadrícula en una pantalla normal al 100% de zoom),
-  // se fija una altura máxima pensada para la pantalla real en vez del ancho de la tarjeta.
-  const aspectClass = feature.wide ? "aspect-[16/9] lg:aspect-auto lg:h-[320px]" : "";
-
-  // Con captura real de la app: la pantalla es el fondo de la tarjeta (en vez del
-  // ícono+color plano), con el título/descripción sobre un degradado al pie, estilo
-  // "tarjeta con foto" — necesita más ancho para que el detalle de la captura se lea.
-  if (feature.image) {
-    return (
-      <div className={`group relative overflow-hidden rounded-sm ${aspectClass} ${wideClasses}`}>
-        <Image
-          src={feature.image}
-          alt={`Captura de la pantalla "${feature.title}" en SuperCasa`}
-          width={1400}
-          height={760}
-          className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-[1.03]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-7 lg:p-10">
-          <h3 className="font-sans text-sm font-bold uppercase tracking-[0.15em] text-cream">
-            {feature.title}
-          </h3>
-          <p className="font-sans text-base leading-relaxed text-cream/85">{feature.body}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={`group flex flex-col gap-4 rounded-sm p-7 transition hover:-translate-y-1 ${TONE_BG[feature.tone]} ${aspectClass} ${
-        feature.wide ? `${wideClasses} lg:p-10` : ""
-      }`}
-    >
-      <feature.Icon
-        className={`shrink-0 ${TONE_FG[feature.tone]} transition-transform duration-200 group-hover:scale-110 ${
-          feature.wide ? "h-14 w-14" : "h-9 w-9"
-        }`}
-      />
-      <div className="mt-auto flex flex-col gap-2">
-        <h3
-          className={`font-sans font-bold uppercase tracking-[0.15em] ${TONE_FG[feature.tone]} ${
-            feature.wide ? "text-sm" : "text-xs"
-          }`}
-        >
-          {feature.title}
-        </h3>
-        <p
-          className={`font-sans leading-relaxed ${TONE_FG[feature.tone]} opacity-80 ${
-            feature.wide ? "max-w-sm text-base" : "text-sm"
-          }`}
-        >
-          {feature.body}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function IconBasket({ className = "h-9 w-9", strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 10h16l-1.5 9a1.5 1.5 0 0 1-1.5 1.3H7a1.5 1.5 0 0 1-1.5-1.3L4 10Z" />
-      <path d="M8 10 9.5 4" />
-      <path d="M16 10 14.5 4" />
-    </svg>
-  );
-}
-
-function IconCart({ className = "h-9 w-9", strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 4h2l2.2 11.4A2 2 0 0 0 9.2 17H18a2 2 0 0 0 2-1.6L21.5 8H6" />
-      <circle cx="9.5" cy="20.5" r="1.3" />
-      <circle cx="17.5" cy="20.5" r="1.3" />
-    </svg>
-  );
-}
-
-function IconList({ className = "h-9 w-9", strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 6h12" />
-      <path d="M8 12h12" />
-      <path d="M8 18h12" />
-      <path d="M4 6h.01" />
-      <path d="M4 12h.01" />
-      <path d="M4 18h.01" />
-    </svg>
-  );
-}
-
-function IconCalendar({ className = "h-9 w-9", strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="4" y="5" width="16" height="15" rx="1" />
-      <path d="M4 10h16" />
-      <path d="M8 3v4" />
-      <path d="M16 3v4" />
-    </svg>
-  );
-}
-
-function IconBook({ className = "h-9 w-9", strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5Z" />
-      <path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5Z" />
-    </svg>
-  );
-}
-
-function IconAuto({ className = "h-9 w-9", strokeWidth = 1.5 }: { className?: string; strokeWidth?: number }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} stroke="currentColor" strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M13 3 5 13h5l-1 8 8-10h-5l1-8Z" />
-    </svg>
   );
 }

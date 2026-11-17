@@ -25,15 +25,16 @@ export default async function ListaCompraPage() {
       <div>
         <h1 className="text-3xl font-extrabold">🧾 Mi lista</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          {rows.length} producto{rows.length === 1 ? "" : "s"} — se arma sola con lo que está bajo
-          en tu despensa, más lo que agregues a mano. Ajusta cantidades y pide directo a La Comer.
+          {rows.length} producto{rows.length === 1 ? "" : "s"} — se arma sola con tu semana
+          planeada, tu último pedido y lo que agregues a mano. Ajusta cantidades y pide directo a
+          La Comer.
         </p>
       </div>
 
       <section className="card">
         {rows.length === 0 ? (
           <p className="text-sm text-ink-soft">
-            No falta nada por ahora. Cuando algo baje del mínimo en tu despensa, aparecerá aquí
+            No falta nada por ahora. Cuando planees tu semana o hagas un pedido, aparecerá aquí
             automáticamente. ✨
           </p>
         ) : (

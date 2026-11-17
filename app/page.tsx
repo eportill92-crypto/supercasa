@@ -2,7 +2,6 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { auth } from "@/auth";
-import { listPantry } from "@/lib/actions/pantry";
 import { computeShoppingList } from "@/lib/actions/shopping-list";
 import { hasLacomerCredentials, getDefaultAddress } from "@/lib/actions/settings";
 import { getWeekMealPlan } from "@/lib/actions/meal-plan";
@@ -16,8 +15,7 @@ export default async function Home() {
   }
 
   const monday = getMonday(new Date());
-  const [pantry, shoppingList, { configured }, address, weekEntries] = await Promise.all([
-    listPantry(),
+  const [shoppingList, { configured }, address, weekEntries] = await Promise.all([
     computeShoppingList(),
     hasLacomerCredentials(),
     getDefaultAddress(),
@@ -33,20 +31,9 @@ export default async function Home() {
       <div>
         <h1 className="text-3xl font-extrabold">Hola{firstName ? `, ${firstName}` : ""} 👋</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Así está tu despensa hoy, {new Date().toLocaleDateString("es-MX", { dateStyle: "long" })}.
+          {new Date().toLocaleDateString("es-MX", { dateStyle: "long" })}. ¿Qué quieres hacer hoy?
         </p>
       </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard label="Productos" value={pantry.length} />
-        <StatCard label="Faltantes" value={shoppingList.length} color={shoppingList.length > 0 ? "sun" : undefined} />
-        <StatCard label="Días planeados" value={`${daysPlanned}/7`} color="brand" />
-      </div>
-
-      <Link href="/inventario" className="-mt-4 flex items-center gap-1 text-sm font-bold text-brand">
-        Ver mi despensa completa
-        <span aria-hidden>→</span>
-      </Link>
 
       {!readyToAutomate && (
         <div className="card border-sun/30 bg-sun-light/60 text-sm text-sun-text">
@@ -62,6 +49,8 @@ export default async function Home() {
         </div>
       )}
 
+      {/* Las 3 opciones principales de inicio: pedir el súper, planear la semana y el
+          recetario — sin despensa/inventario (difícil de mantener al día, se quitó). */}
       <div className="flex flex-col gap-4">
         <Link
           href="/pedir-super"
@@ -72,13 +61,13 @@ export default async function Home() {
             <span className="text-3xl">🛒</span>
             {shoppingList.length > 0 && (
               <span className="rounded-full bg-white/20 px-3 py-1 text-xs font-bold">
-                {shoppingList.length} te están faltando
+                {shoppingList.length} en tu lista
               </span>
             )}
           </div>
           <div className="mt-3 text-xl font-extrabold">Pedir el súper</div>
           <p className="mt-1 text-sm opacity-90">
-            Arma tu pedido por categoría — te avisamos qué se te está acabando.
+            Arma tu pedido con tu lista, tu semana planeada y tu último pedido.
           </p>
           <div className="mt-4 flex items-center gap-1.5 text-sm font-bold">
             Empezar <span aria-hidden>→</span>
@@ -104,29 +93,24 @@ export default async function Home() {
             Empezar <span aria-hidden>→</span>
           </div>
         </Link>
+
+        <Link
+          href="/recetas"
+          className="rounded-3xl p-6 text-white shadow-lg transition hover:-translate-y-0.5"
+          style={{ background: "linear-gradient(135deg,#9a6b2f 0%,#6b4718 100%)" }}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-3xl">📖</span>
+          </div>
+          <div className="mt-3 text-xl font-extrabold">Recetario</div>
+          <p className="mt-1 text-sm opacity-90">
+            Tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti.
+          </p>
+          <div className="mt-4 flex items-center gap-1.5 text-sm font-bold">
+            Empezar <span aria-hidden>→</span>
+          </div>
+        </Link>
       </div>
-    </div>
-  );
-}
-
-const STAT_TEXT_COLORS = {
-  brand: "text-brand-text",
-  sun: "text-sun-text",
-} as const;
-
-function StatCard({
-  label,
-  value,
-  color,
-}: {
-  label: string;
-  value: number | string;
-  color?: keyof typeof STAT_TEXT_COLORS;
-}) {
-  return (
-    <div className="card flex flex-col items-center gap-0.5 !p-3.5 text-center">
-      <div className={`text-xl font-extrabold ${color ? STAT_TEXT_COLORS[color] : ""}`}>{value}</div>
-      <div className="text-[11px] font-semibold text-ink-soft">{label}</div>
     </div>
   );
 }

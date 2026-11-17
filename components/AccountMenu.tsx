@@ -13,7 +13,6 @@ const SECTIONS: {
     label: "Tu súper",
     items: [
       { href: "/pedir-super", label: "Pedir el súper", icon: "🛒" },
-      { href: "/inventario", label: "Mi despensa", icon: "🧺" },
       { href: "/lista-compra", label: "Mi lista", icon: "🧾" },
       { href: "/pedidos", label: "Pedidos", icon: "📋", badge: "Historial" },
       { href: "/configuracion#credenciales", label: "Mis credenciales", icon: "🔑", badge: "La Comer" },

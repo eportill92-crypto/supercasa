@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "SuperCasa",
     short_name: "SuperCasa",
-    description: "Inventario de despensa y pedidos automáticos a La Comer",
+    description: "Planeación de semana, recetario y pedidos automáticos a La Comer",
     start_url: "/",
     display: "standalone",
     background_color: "#f5faf9",

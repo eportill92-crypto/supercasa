@@ -7,7 +7,7 @@ import { addManualShoppingItem, addExistingProductToList, computeShoppingList } 
 export default async function PedirSuperPage() {
   const [groups, shoppingList] = await Promise.all([listProductsGroupedByCategory(), computeShoppingList()]);
 
-  const lowStock = shoppingList.filter((r) => r.reason === "stock_bajo");
+  const suggested = shoppingList.filter((r) => r.reason !== "agregado_manual");
 
   return (
     <div className="flex flex-col gap-8">
@@ -27,17 +27,15 @@ export default async function PedirSuperPage() {
           <span className="text-xl">✨</span>
           <span className="text-sm font-bold">¿No sabes por dónde empezar? Mira los básicos del hogar</span>
         </Link>
-        <Link href="/inventario" className="card flex flex-1 min-w-[220px] items-center gap-3 !p-4">
-          <span className="text-xl">🧺</span>
-          <span className="text-sm font-bold">Ver mi despensa completa</span>
-        </Link>
       </div>
 
-      {lowStock.length > 0 && (
+      {suggested.length > 0 && (
         <section>
-          <h2 className="mb-2 text-xs font-extrabold uppercase tracking-wide text-sun-text">Se te está acabando</h2>
+          <h2 className="mb-2 text-xs font-extrabold uppercase tracking-wide text-sun-text">
+            Sugerido (de tu semana planeada y tu último pedido)
+          </h2>
           <div className="flex flex-wrap gap-2">
-            {lowStock.map((row) => (
+            {suggested.map((row) => (
               <form key={row.productId} action={addExistingProductToList}>
                 <input type="hidden" name="productId" value={row.productId} />
                 <input type="hidden" name="quantity" value={row.suggestedQty} />

@@ -7,8 +7,8 @@ import { computeShoppingListForUser, type ShoppingListRow } from "@/lib/shopping
 
 export type { ShoppingListRow };
 
-// Combina lo que está por debajo del mínimo en la despensa con lo agregado a mano,
-// sugiriendo cuánto comprar con base en la cantidad objetivo (o el doble del mínimo si no hay una).
+// Arma la lista con lo agregado a mano, los ingredientes de tu semana planeada y lo que
+// pediste la última vez — ver computeShoppingListForUser para el detalle.
 export async function computeShoppingList(): Promise<ShoppingListRow[]> {
   const userId = await requireUserId();
   return computeShoppingListForUser(userId);

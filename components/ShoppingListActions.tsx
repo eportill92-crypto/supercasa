@@ -37,7 +37,7 @@ export default function ShoppingListActions({ rows }: { rows: ShoppingListRowWit
     startTransition(async () => {
       try {
         await registerOrder({ items: selectedItems, source: "manual" });
-        setResult("Pedido registrado manualmente y el inventario se repuso. ✅");
+        setResult("Pedido registrado manualmente. ✅");
       } catch (err) {
         setResult(err instanceof Error ? err.message : "Error al registrar el pedido");
       }
@@ -69,10 +69,10 @@ export default function ShoppingListActions({ rows }: { rows: ShoppingListRowWit
                     {row.brand && <span className="ml-1.5 font-normal text-ink-soft">· {row.brand}</span>}
                   </div>
                   <div className="text-xs">
-                    {row.reason === "stock_bajo" ? (
-                      <span className="badge-sun">
-                        Tienes {row.currentQty} {row.unit}, mínimo {row.minThreshold}
-                      </span>
+                    {row.reason === "plan_semana" ? (
+                      <span className="badge-brand">De tu semana planeada</span>
+                    ) : row.reason === "pedido_anterior" ? (
+                      <span className="badge-mint">De tu pedido anterior</span>
                     ) : (
                       <span className="badge-grape">Agregado manualmente</span>
                     )}

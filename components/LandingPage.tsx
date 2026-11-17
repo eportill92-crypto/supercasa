@@ -52,15 +52,15 @@ export default function LandingPage() {
               Para tu casa
             </span>
             <h1 className="text-4xl leading-[1.02] font-medium tracking-tight text-cream sm:text-5xl lg:text-6xl">
-              Tu despensa,
+              Tu súper,
               <br />
-              tu súper y tu semana,
+              tu semana y tus recetas,
               <br />
               <em className="italic text-mint-dark">organizados solos.</em>
             </h1>
             <p className="max-w-sm text-[15px] leading-relaxed text-cream/70">
-              SuperCasa lleva el control de lo que tienes en casa, te ayuda a planear qué van a
-              comer y arma el pedido del súper por ti — todo en un solo lugar.
+              SuperCasa te ayuda a planear qué van a comer, arma el pedido del súper por ti y
+              guarda tus recetas de siempre — todo en un solo lugar.
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
@@ -86,7 +86,7 @@ export default function LandingPage() {
             <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
               <Image
                 src="/landing-screenshot.png"
-                alt="Pantalla de inicio de SuperCasa, con el resumen de la despensa y los accesos a Pedir el súper y Planear tu semana"
+                alt="Pantalla de inicio de SuperCasa, con los accesos a Pedir el súper, Planear tu semana y Recetario"
                 width={1400}
                 height={780}
                 className="h-auto w-full"
@@ -106,14 +106,7 @@ export default function LandingPage() {
             Todo lo que hace por ti
           </h2>
           <div className="mt-10 flex flex-col gap-4">
-            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:1055fr_611fr]">
-              <Image
-                src="/landing-despensa.png"
-                alt="Mi despensa: lo que tienes en casa, agrupado por categoría, con aviso de qué se está acabando."
-                width={1055}
-                height={296}
-                className="h-auto w-full rounded-sm"
-              />
+            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:611fr_570fr]">
               <Image
                 src="/landing-pedir-super.png"
                 alt="Pedir el súper: arma tu pedido por categoría, con lo que ya sabes que compras seguido."
@@ -121,8 +114,6 @@ export default function LandingPage() {
                 height={296}
                 className="h-auto w-full rounded-sm"
               />
-            </div>
-            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:570fr_1101fr]">
               <Image
                 src="/landing-mi-lista.png"
                 alt="Mi lista: una sola lista para comida, limpieza, higiene y lo que se te ocurra."
@@ -130,20 +121,13 @@ export default function LandingPage() {
                 height={271}
                 className="h-auto w-full rounded-sm"
               />
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:1101fr_681fr]">
               <Image
                 src="/landing-planear-semana.png"
                 alt="Planear tu semana: desayuno, comida, cena y snacks — la lista de compra se arma sola."
                 width={1101}
                 height={271}
-                className="h-auto w-full rounded-sm"
-              />
-            </div>
-            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:985fr_681fr]">
-              <Image
-                src="/landing-recetario.png"
-                alt="Recetario: tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti."
-                width={985}
-                height={264}
                 className="h-auto w-full rounded-sm"
               />
               <Image
@@ -154,6 +138,13 @@ export default function LandingPage() {
                 className="h-auto w-full rounded-sm"
               />
             </div>
+            <Image
+              src="/landing-recetario.png"
+              alt="Recetario: tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti."
+              width={985}
+              height={264}
+              className="h-auto w-full rounded-sm"
+            />
           </div>
         </section>
 
@@ -165,7 +156,7 @@ export default function LandingPage() {
               ¿Le damos una organizada a tu casa?
             </h2>
             <ul className="flex flex-col gap-2.5 text-[15px] text-ink">
-              {["Controla lo que tienes", "Planea tus comidas", "Ahorra tiempo en el súper"].map((item) => (
+              {["Planea tus comidas", "Arma tu pedido en minutos", "Repite tu último pedido fácil"].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-mint-dark text-xs text-cream">
                     ✓
@@ -189,14 +180,20 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_20px_50px_-20px_rgba(28,35,51,0.4)]">
-            <Image
-              src="/landing-despensa-foto.png"
-              alt="Repisa con despensa organizada: frascos de pasta, granola y especias, con una canasta de cebollas y ajo abajo"
-              width={595}
-              height={296}
-              className="h-auto w-full"
+          <div className="relative">
+            <div
+              aria-hidden
+              className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-brand-light/40 sm:-right-6 sm:-bottom-6"
             />
+            <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_20px_50px_-20px_rgba(28,35,51,0.4)]">
+              <Image
+                src="/landing-screenshot.png"
+                alt="Pantalla de inicio de SuperCasa, con los accesos a Pedir el súper, Planear tu semana y Recetario"
+                width={1400}
+                height={780}
+                className="h-auto w-full"
+              />
+            </div>
           </div>
         </section>
 

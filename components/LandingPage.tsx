@@ -45,10 +45,13 @@ export default function LandingPage() {
         />
         {/* Hero compacto (sin min-height ligado al viewport) — a petición del usuario, siguiendo
             una referencia de diseño más corta y directa en vez de ocupar la pantalla completa.
-            La foto llena el lado derecho de borde a borde (sin marco, sombra ni recuadro) en vez
-            de vivir en una tarjeta flotante sobre el azul, también a petición explícita. */}
-        <div className="relative mx-auto flex max-w-[1400px] flex-col lg:flex-row lg:items-stretch">
-          <div className="flex flex-col gap-5 px-6 py-14 sm:px-10 lg:w-[54%] lg:px-16 lg:py-20">
+            La foto llena el lado derecho de borde a borde: en vez de vivir dentro del mismo
+            contenedor centrado max-w-[1400px] que el texto (lo que en pantallas más anchas que
+            1400px dejaba una franja azul vacía entre la imagen y el borde real de la pantalla),
+            va posicionada absoluta respecto a la sección completa (que sí es full-bleed), con un
+            ancho en % del viewport en vez de del contenedor. */}
+        <div className="relative z-10 mx-auto max-w-[1400px] px-6 py-14 sm:px-10 lg:px-16 lg:py-20">
+          <div className="flex flex-col gap-5 lg:max-w-[46%]">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
               Para tu casa
             </span>
@@ -78,17 +81,24 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
+        </div>
 
-          <div className="relative w-full lg:w-[46%]">
-            <Image
-              src="/landing-cta-laptop.png"
-              alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
-              width={1100}
-              height={662}
-              className="h-64 w-full object-cover object-left sm:h-80 lg:h-full"
-              priority
-            />
-          </div>
+        <div className="relative w-full overflow-hidden lg:absolute lg:inset-y-0 lg:right-0 lg:w-[54%]">
+          <Image
+            src="/landing-cta-laptop.png"
+            alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
+            fill
+            className="hidden object-cover object-left lg:block"
+            priority
+          />
+          <Image
+            src="/landing-cta-laptop.png"
+            alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
+            width={1100}
+            height={662}
+            className="h-64 w-full object-cover object-left sm:h-80 lg:hidden"
+            priority
+          />
         </div>
       </section>
 

@@ -34,7 +34,7 @@ export default function LandingPage() {
       {/* Hero — fondo propio (degradado azul de marca + resplandor difuminado) que se sale del
           ancho del contenido para distinguirse como su propio bloque, en vez de vivir sobre el
           crema del resto de la página. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
+      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-10 sm:px-10 lg:px-16 lg:py-10">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint-dark opacity-20 blur-[110px]"
@@ -43,14 +43,15 @@ export default function LandingPage() {
           aria-hidden
           className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
         />
-        {/* Hero compacto (sin min-height ligado al viewport) — a petición del usuario, siguiendo
-            una referencia de diseño más corta y directa en vez de ocupar la pantalla completa. */}
-        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-          <div className="flex flex-col gap-5">
+        {/* Hero compacto (sin min-height ligado al viewport) — más corto todavía a petición del
+            usuario: en ventanas de poca altura "Todo lo que hace por ti" quedaba apenas asomado
+            al fondo. Menos padding vertical y headline un poco más chico que antes. */}
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div className="flex flex-col gap-4">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
               Para tu casa
             </span>
-            <h1 className="text-5xl leading-[0.98] font-medium tracking-tight text-cream sm:text-6xl lg:text-7xl">
+            <h1 className="text-4xl leading-[1.02] font-medium tracking-tight text-cream sm:text-5xl lg:text-6xl">
               Tu despensa,
               <br />
               tu súper y tu semana,

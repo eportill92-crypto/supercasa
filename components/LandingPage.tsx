@@ -34,24 +34,19 @@ export default function LandingPage() {
       {/* Hero — fondo propio (degradado azul de marca + resplandor difuminado) que se sale del
           ancho del contenido para distinguirse como su propio bloque, en vez de vivir sobre el
           crema del resto de la página. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)]">
+      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-32 -right-32 z-10 h-[36rem] w-[36rem] rounded-full bg-mint-dark opacity-20 blur-[110px]"
+          className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint-dark opacity-20 blur-[110px]"
         />
         <div
           aria-hidden
           className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
         />
         {/* Hero compacto (sin min-height ligado al viewport) — a petición del usuario, siguiendo
-            una referencia de diseño más corta y directa en vez de ocupar la pantalla completa.
-            La foto llena el lado derecho de borde a borde: en vez de vivir dentro del mismo
-            contenedor centrado max-w-[1400px] que el texto (lo que en pantallas más anchas que
-            1400px dejaba una franja azul vacía entre la imagen y el borde real de la pantalla),
-            va posicionada absoluta respecto a la sección completa (que sí es full-bleed), con un
-            ancho en % del viewport en vez de del contenedor. */}
-        <div className="relative z-10 mx-auto max-w-[1400px] px-6 py-14 sm:px-10 lg:px-16 lg:py-20">
-          <div className="flex flex-col gap-5 lg:max-w-[46%]">
+            una referencia de diseño más corta y directa en vez de ocupar la pantalla completa. */}
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
+          <div className="flex flex-col gap-5">
             <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
               Para tu casa
             </span>
@@ -81,24 +76,23 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-        </div>
 
-        <div className="relative w-full overflow-hidden lg:absolute lg:inset-y-0 lg:right-0 lg:w-[54%]">
-          <Image
-            src="/landing-cta-laptop.png"
-            alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
-            fill
-            className="hidden object-cover object-left lg:block"
-            priority
-          />
-          <Image
-            src="/landing-cta-laptop.png"
-            alt="Laptop en una cocina mostrando la pantalla de inicio de SuperCasa, junto a una bolsa del súper con verduras y pan"
-            width={1100}
-            height={662}
-            className="h-64 w-full object-cover object-left sm:h-80 lg:hidden"
-            priority
-          />
+          <div className="relative">
+            <div
+              aria-hidden
+              className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-mint-dark sm:-right-6 sm:-bottom-6"
+            />
+            <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
+              <Image
+                src="/landing-screenshot.png"
+                alt="Pantalla de inicio de SuperCasa, con el resumen de la despensa y los accesos a Pedir el súper y Planear tu semana"
+                width={1400}
+                height={780}
+                className="h-auto w-full"
+                priority
+              />
+            </div>
+          </div>
         </div>
       </section>
 

@@ -13,7 +13,7 @@ export default function LandingPage() {
           se sale del ancho del contenido para distinguirse como su propio bloque. Estilo
           inspirado en la referencia de marca del usuario: tipografía sans en negritas (no
           serif editorial), verde oscuro, foto de producto real en vez de screenshot grande. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#1f4d38_0%,#153626_55%,#0d2419_100%)] px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
+      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#1f4d38_0%,#153626_55%,#0d2419_100%)] px-6 py-6 sm:px-10 lg:px-16 lg:py-8">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint opacity-20 blur-[110px]"
@@ -59,7 +59,7 @@ export default function LandingPage() {
 
           <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)] lg:h-full lg:max-w-none">
             <Image
-              src="/landing-hero-bag.png"
+              src="/landing-hero-bag-v3.png"
               alt="Bolsa de tela de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
               width={506}
               height={500}

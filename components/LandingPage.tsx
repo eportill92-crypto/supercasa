@@ -60,9 +60,9 @@ export default function LandingPage() {
           <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)] lg:h-full lg:max-w-none">
             <Image
               src="/landing-hero-bag.png"
-              alt="Bolsa de papel de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
-              width={400}
-              height={480}
+              alt="Bolsa de tela de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
+              width={506}
+              height={500}
               className="h-auto w-full lg:h-full lg:w-full lg:object-cover"
               priority
             />

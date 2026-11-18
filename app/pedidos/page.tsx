@@ -21,8 +21,8 @@ export default async function PedidosPage() {
       <div>
         <h1 className="text-3xl font-extrabold">📋 Pedidos</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Registra lo que compraste (en La Comer o en tienda) para reponer el inventario
-          automáticamente. El formulario ya viene precargado con tu último pedido.
+          Registra lo que compraste (en La Comer o en tienda) para llevar tu historial de
+          pedidos. El formulario ya viene precargado con tu último pedido.
         </p>
       </div>
 
@@ -32,7 +32,8 @@ export default async function PedidosPage() {
         </h2>
         {products.length === 0 ? (
           <p className="mt-3 text-sm text-ink-soft">
-            Primero agrega productos en Inventario para poder registrarlos aquí.
+            Primero agrega productos a tu lista de compra o planea tu semana para poder
+            registrarlos aquí.
           </p>
         ) : (
           <div className="mt-4">

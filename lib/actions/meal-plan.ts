@@ -115,7 +115,7 @@ export async function prepareMeal(entryId: string): Promise<PrepareMealResult> {
     revalidatePath("/recetas");
     revalidatePath("/");
 
-    return { success: true, message: "Comida preparada, inventario actualizado." };
+    return { success: true, message: "Comida preparada. ✅" };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return { success: false, message: `Error inesperado: ${message}` };

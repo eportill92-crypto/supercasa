@@ -12,7 +12,7 @@ export default function RegistroPage() {
         </div>
         <h1 className="mt-3 text-2xl font-extrabold">SuperCasa</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Crea tu cuenta para llevar tu propio inventario, recetas y pedidos.
+          Crea tu cuenta para planear tu semana, guardar tus recetas y pedir el súper solo.
         </p>
       </div>
       <div className="card">

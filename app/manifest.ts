@@ -10,8 +10,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Planeación de semana, recetario y pedidos automáticos a La Comer",
     start_url: "/",
     display: "standalone",
-    background_color: "#f5faf9",
-    theme_color: "#2563eb",
+    background_color: "#fffbf5",
+    theme_color: "#1b4332",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },

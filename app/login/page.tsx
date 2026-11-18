@@ -17,7 +17,7 @@ export default async function LoginPage({
           🛒
         </div>
         <h1 className="mt-3 text-2xl font-extrabold">SuperCasa</h1>
-        <p className="mt-1 text-sm text-ink-soft">Inicia sesión para ver tu despensa.</p>
+        <p className="mt-1 text-sm text-ink-soft">Inicia sesión para pedir, planear y cocinar.</p>
       </div>
       <div className="card">
         <LoginForm callbackUrl={params.callbackUrl ?? "/"} />

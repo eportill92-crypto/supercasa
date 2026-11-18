@@ -1,94 +1,75 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Fraunces } from "next/font/google";
 import LeadForm from "./LeadForm";
-
-// Serif editorial, solo para esta página — el resto de la app sigue con Geist (sans) como
-// siempre. Inspirado en el estilo de marcas tipo boutique (serif cálido, paleta terrosa,
-// mucho espacio en blanco) en vez del lenguaje de tarjetas de colores del resto de la app.
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-});
-
-// Grano sutil (SVG feTurbulence) superpuesto a toda la página — la textura plana de los
-// bloques de color se sentía "de maqueta"; esto le da algo de profundidad táctil sin
-// depender de fotografía real. Puramente decorativo (pointer-events-none), cero JS.
-const GRAIN_URL =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E";
 
 export default function LandingPage() {
   return (
     // El <main> global de la app limita el ancho a max-w-5xl (pensado para el dashboard) —
     // esto la saca de ese contenedor para usar el ancho real de la pantalla, con su propio
     // máximo más generoso para pantallas grandes. El -mt-6 cancela el py-6 que <main> le pone
-    // arriba (si no, queda una franja crema entre el header y el azul del hero).
-    <div className={`${fraunces.className} relative left-1/2 right-1/2 -mx-[50vw] -mt-6 w-screen`}>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-10 opacity-[0.035] mix-blend-overlay"
-        style={{ backgroundImage: `url("${GRAIN_URL}")` }}
-      />
-
-      {/* Hero — fondo propio (degradado azul de marca + resplandor difuminado) que se sale del
-          ancho del contenido para distinguirse como su propio bloque, en vez de vivir sobre el
-          crema del resto de la página. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#2b4ea8_0%,#1c3578_55%,#162a5e_100%)] px-6 py-10 sm:px-10 lg:px-16 lg:py-10">
+    // arriba (si no, queda una franja crema entre el header y el verde del hero).
+    <div className="relative left-1/2 right-1/2 -mx-[50vw] -mt-6 w-screen">
+      {/* Hero — fondo propio (degradado verde bosque de marca + resplandores difuminados) que
+          se sale del ancho del contenido para distinguirse como su propio bloque. Estilo
+          inspirado en la referencia de marca del usuario: tipografía sans en negritas (no
+          serif editorial), verde oscuro, foto de producto real en vez de screenshot grande. */}
+      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#1f4d38_0%,#153626_55%,#0d2419_100%)] px-6 py-14 sm:px-10 lg:px-16 lg:py-16">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint-dark opacity-20 blur-[110px]"
+          className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint opacity-20 blur-[110px]"
         />
         <div
           aria-hidden
           className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
         />
-        {/* Hero compacto (sin min-height ligado al viewport) — más corto todavía a petición del
-            usuario: en ventanas de poca altura "Todo lo que hace por ti" quedaba apenas asomado
-            al fondo. Menos padding vertical y headline un poco más chico que antes. */}
-        <div className="relative mx-auto grid max-w-[1400px] items-center gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-16">
-          <div className="flex flex-col gap-4">
-            <span className="text-xs font-semibold uppercase tracking-[0.25em] text-brand-light/80">
+        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+          <div className="flex flex-col gap-5">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-mint">
               Para tu casa
             </span>
-            <h1 className="text-4xl leading-[1.02] font-medium tracking-tight text-cream sm:text-5xl lg:text-6xl">
-              Tu súper,
+            <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-cream sm:text-5xl lg:text-6xl">
+              Tu súper, tu semana
               <br />
-              tu semana y tus recetas,
-              <br />
-              <em className="italic text-mint-dark">organizados solos.</em>
+              y tus recetas,{" "}
+              <span className="relative inline-block">
+                organizados solos.
+                <span
+                  aria-hidden
+                  className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-mint sm:-bottom-2"
+                />
+              </span>
             </h1>
-            <p className="max-w-sm text-[15px] leading-relaxed text-cream/70">
+            <p className="max-w-md text-[15px] leading-relaxed text-cream/75">
               SuperCasa te ayuda a planear qué van a comer, arma el pedido del súper por ti y
               guarda tus recetas de siempre — todo en un solo lugar.
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
-                className="inline-flex items-center justify-center rounded-full bg-cream px-7 py-3 text-sm font-semibold text-brand-dark shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-white"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-mint px-7 py-3 text-sm font-bold text-brand-text shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-mint-dark hover:text-cream"
               >
-                Crear cuenta gratis
+                Crear cuenta gratis <span aria-hidden>→</span>
               </Link>
               <Link
                 href="/login"
-                className="text-sm font-semibold uppercase tracking-wide text-cream underline underline-offset-4"
+                className="text-sm font-bold uppercase tracking-wide text-cream underline underline-offset-4"
               >
                 Ya tengo cuenta
               </Link>
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative mx-auto w-full max-w-xs lg:max-w-sm">
             <div
               aria-hidden
-              className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-mint-dark sm:-right-6 sm:-bottom-6"
+              className="absolute -right-4 -bottom-4 h-full w-full rounded-2xl bg-mint sm:-right-6 sm:-bottom-6"
             />
-            <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
+            <div className="relative overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
               <Image
-                src="/landing-screenshot.png"
-                alt="Pantalla de inicio de SuperCasa, con los accesos a Pedir el súper, Planear tu semana y Recetario"
-                width={1400}
-                height={780}
+                src="/landing-hero-bag.png"
+                alt="Bolsa de papel de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
+                width={400}
+                height={480}
                 className="h-auto w-full"
                 priority
               />
@@ -97,62 +78,99 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <div className="relative mx-auto flex max-w-[1400px] flex-col gap-16 px-6 py-8 sm:px-10 lg:px-16">
-        {/* Features — cada fila usa el ancho real de sus dos recortes como proporción de
-            columnas, para que ambos lados compartan la misma altura sin recortar nada de la
-            imagen (el texto y el logo ya vienen incluidos en cada captura). */}
+      <div className="relative mx-auto flex max-w-[1400px] flex-col gap-16 px-6 py-12 sm:px-10 lg:px-16">
+        {/* Franja de beneficios — igual que la referencia, 3 tarjetas con ícono. */}
+        <section className="grid grid-cols-1 gap-6 rounded-2xl border border-black/5 bg-white p-6 shadow-[0_2px_16px_-6px_rgba(41,37,36,0.1)] sm:grid-cols-3 sm:p-8">
+          {[
+            { icon: "⚡", title: "Ahorra tiempo", text: "Tu súper y tu semana, en minutos." },
+            { icon: "🔁", title: "Se repite solo", text: "Pedidos automáticos cuando tú quieras." },
+            { icon: "🗂️", title: "Todo en un lugar", text: "Lista, plan semanal y recetas juntos." },
+          ].map((item) => (
+            <div key={item.title} className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-mint-light text-xl">
+                {item.icon}
+              </span>
+              <div>
+                <div className="font-extrabold text-ink">{item.title}</div>
+                <div className="text-sm text-ink-soft">{item.text}</div>
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Cómo funciona — 3 pasos numerados, estilo de la referencia. */}
+        <section>
+          <span className="text-xs font-bold uppercase tracking-[0.25em] text-mint-dark">
+            Cómo funciona
+          </span>
+          <h2 className="mt-2 text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
+            Muy simple.
+          </h2>
+          <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-3 sm:gap-6">
+            {[
+              { n: "1", title: "Planea", text: "Agrega a tu lista, planea tu semana o guarda tus recetas." },
+              { n: "2", title: "Revisamos por ti", text: "Armamos tu pedido con tu lista, tu plan y tu historial." },
+              { n: "3", title: "Recíbelo en casa", text: "Pedido automático a tu súper, en el horario que prefieras." },
+            ].map((step) => (
+              <div key={step.n} className="flex flex-col gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-mint-light text-lg font-extrabold text-brand-text">
+                  {step.n}
+                </span>
+                <div className="font-extrabold text-ink">{step.title}</div>
+                <p className="text-sm text-ink-soft">{step.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Funcionalidades — capturas reales de la app, no mockups. */}
         <section id="funcionalidades">
-          <h2 className="text-4xl font-medium tracking-tight text-ink sm:text-5xl">
+          <h2 className="text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
             Todo lo que hace por ti
           </h2>
-          <div className="mt-10 flex flex-col gap-4">
-            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:611fr_570fr]">
-              <Image
-                src="/landing-pedir-super.png"
-                alt="Pedir el súper: arma tu pedido por categoría, con lo que ya sabes que compras seguido."
-                width={611}
-                height={296}
-                className="h-auto w-full rounded-sm"
-              />
-              <Image
-                src="/landing-mi-lista.png"
-                alt="Mi lista: una sola lista para comida, limpieza, higiene y lo que se te ocurra."
-                width={570}
-                height={271}
-                className="h-auto w-full rounded-sm"
-              />
-            </div>
-            <div className="grid grid-cols-1 gap-5 sm:[grid-template-columns:1101fr_681fr]">
-              <Image
-                src="/landing-planear-semana.png"
-                alt="Planear tu semana: desayuno, comida, cena y snacks — la lista de compra se arma sola."
-                width={1101}
-                height={271}
-                className="h-auto w-full rounded-sm"
-              />
-              <Image
-                src="/landing-pedidos-auto.png"
-                alt="Pedidos automáticos: conecta tu cuenta del súper y deja que el pedido se arme solo."
-                width={681}
-                height={264}
-                className="h-auto w-full rounded-sm"
-              />
-            </div>
+          <div className="mt-10 flex flex-col gap-5">
+            <Image
+              src="/landing-pedir-super.png"
+              alt="Pedir el súper: arma tu pedido por categoría, con lo que ya sabes que compras seguido."
+              width={2032}
+              height={616}
+              className="h-auto w-full rounded-sm"
+            />
+            <Image
+              src="/landing-mi-lista.png"
+              alt="Mi lista: una sola lista para comida, limpieza, higiene y lo que se te ocurra."
+              width={2166}
+              height={964}
+              className="h-auto w-full rounded-sm"
+            />
+            <Image
+              src="/landing-planear-semana.png"
+              alt="Planear tu semana: desayuno, comida, cena y snacks — la lista de compra se arma sola."
+              width={2216}
+              height={1432}
+              className="h-auto w-full rounded-sm"
+            />
+            <Image
+              src="/landing-pedidos-auto.png"
+              alt="Pedidos automáticos: conecta tu cuenta del súper y deja que el pedido se arme solo."
+              width={2166}
+              height={304}
+              className="h-auto w-full rounded-sm"
+            />
             <Image
               src="/landing-recetario.png"
               alt="Recetario: tus recetas de siempre, o súbelas por foto, PDF o link y las leemos por ti."
-              width={985}
-              height={264}
+              width={2216}
+              height={718}
               className="h-auto w-full rounded-sm"
             />
           </div>
         </section>
 
-        {/* CTA final — tarjeta con fondo verde suave y lista de beneficios en vez del párrafo
-            único de antes, a petición del usuario. */}
-        <section className="grid items-center gap-10 rounded-sm bg-mint-light p-10 lg:grid-cols-2 lg:gap-16 lg:p-14">
+        {/* CTA final — captura real y actual del dashboard. */}
+        <section className="grid items-center gap-10 rounded-2xl bg-mint-light p-10 lg:grid-cols-2 lg:gap-16 lg:p-14">
           <div className="flex flex-col gap-5">
-            <h2 className="text-4xl font-medium leading-[1.05] tracking-tight text-ink sm:text-5xl">
+            <h2 className="text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-5xl">
               ¿Le damos una organizada a tu casa?
             </h2>
             <ul className="flex flex-col gap-2.5 text-[15px] text-ink">
@@ -168,13 +186,13 @@ export default function LandingPage() {
             <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
-                className="inline-flex items-center justify-center rounded-full bg-ink px-7 py-3 text-sm font-semibold text-cream shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(0,0,0,0.35)] transition hover:-translate-y-0.5 hover:bg-black"
+                className="inline-flex items-center justify-center rounded-full bg-brand px-7 py-3 text-sm font-bold text-cream shadow-[0_1px_2px_rgba(0,0,0,0.1),0_8px_24px_-8px_rgba(27,67,50,0.5)] transition hover:-translate-y-0.5 hover:bg-brand-dark"
               >
                 Empezar ahora
               </Link>
               <Link
                 href="/login"
-                className="text-sm font-semibold uppercase tracking-wide text-ink underline underline-offset-4"
+                className="text-sm font-bold uppercase tracking-wide text-ink underline underline-offset-4"
               >
                 Ya tengo cuenta
               </Link>
@@ -183,11 +201,11 @@ export default function LandingPage() {
           <div className="relative">
             <div
               aria-hidden
-              className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-brand-light/40 sm:-right-6 sm:-bottom-6"
+              className="absolute -right-4 -bottom-4 h-full w-full rounded-sm bg-brand-light/50 sm:-right-6 sm:-bottom-6"
             />
             <div className="relative overflow-hidden rounded-sm shadow-[0_1px_2px_rgba(0,0,0,0.2),0_20px_50px_-20px_rgba(28,35,51,0.4)]">
               <Image
-                src="/landing-screenshot.png"
+                src="/landing-screenshot-v2.png"
                 alt="Pantalla de inicio de SuperCasa, con los accesos a Pedir el súper, Planear tu semana y Recetario"
                 width={1400}
                 height={780}
@@ -199,8 +217,8 @@ export default function LandingPage() {
 
         {/* Contacto — alargada y debajo del CTA, no metida en la mitad de la columna, para que
             el formulario respire y no compita con el botón de "Empezar ahora" de arriba. */}
-        <section className="rounded-sm bg-sun-light p-10 shadow-[0_30px_60px_-24px_rgba(28,35,51,0.3)] lg:p-14">
-          <h2 className="text-3xl font-medium tracking-tight text-ink sm:text-4xl">
+        <section className="rounded-2xl bg-sun-light p-10 shadow-[0_30px_60px_-24px_rgba(28,35,51,0.3)] lg:p-14">
+          <h2 className="text-3xl font-extrabold tracking-tight text-ink sm:text-4xl">
             ¿Prefieres que te contactemos nosotros?
           </h2>
           <p className="mt-2 max-w-md text-[15px] text-ink-soft">

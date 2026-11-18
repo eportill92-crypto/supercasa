@@ -22,8 +22,8 @@ export default async function RecetasPage({
       <div>
         <h1 className="text-3xl font-extrabold">📖 Recetario</h1>
         <p className="mt-1 text-sm text-ink-soft">
-          Ordenadas para cocinar con lo que ya tienes: primero tus recetas y las que ya has
-          preparado, luego las que más se acercan a tu inventario actual.
+          Ordenadas para cocinar fácil: primero tus recetas y las que ya has preparado, luego
+          las que menos ingredientes te falten.
         </p>
       </div>
 

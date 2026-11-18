@@ -55,7 +55,7 @@ export default async function Home() {
         <Link
           href="/pedir-super"
           className="rounded-3xl p-6 text-white shadow-lg transition hover:-translate-y-0.5"
-          style={{ background: "linear-gradient(135deg,#26449e 0%,#1c3578 100%)" }}
+          style={{ background: "linear-gradient(135deg,#1b4332 0%,#0f2e21 100%)" }}
         >
           <div className="flex items-center justify-between">
             <span className="text-3xl">🛒</span>

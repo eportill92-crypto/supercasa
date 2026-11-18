@@ -43,8 +43,8 @@ export default async function MenuSemanalPage({
         <div>
           <h1 className="text-3xl font-extrabold">📅 Planear tu semana</h1>
           <p className="mt-1 text-sm text-ink-soft">
-            Asigna una receta a cada comida y márcala como preparada cuando la cocines: la
-            despensa se descuenta sola.
+            Asigna una receta a cada comida y márcala como preparada cuando la cocines: sus
+            ingredientes salen de tu lista de compra.
           </p>
         </div>
         <div className="flex shrink-0 rounded-full bg-black/5 p-1 text-xs font-bold">

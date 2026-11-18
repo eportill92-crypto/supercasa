@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 // la app instalada) del azul de marca en vez del gris/blanco por default.
 export const viewport: Viewport = {
   colorScheme: "light",
-  themeColor: "#26449e",
+  themeColor: "#1b4332",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {

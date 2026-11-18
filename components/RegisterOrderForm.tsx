@@ -45,7 +45,7 @@ export default function RegisterOrderForm({
 
     startTransition(async () => {
       await registerOrder({ items, source: "manual", notes: notes || undefined });
-      setMessage("Pedido registrado. El inventario ya se repuso. ✅");
+      setMessage("Pedido registrado. ✅");
       setRows([{ productId: products[0]?.id ?? "", quantity: 1 }]);
       setNotes("");
     });
@@ -91,7 +91,7 @@ export default function RegisterOrderForm({
       />
 
       <button type="button" disabled={isPending} onClick={submit} className="btn-primary self-start">
-        {isPending ? "Guardando..." : "Registrar pedido y reponer inventario"}
+        {isPending ? "Guardando..." : "Registrar pedido"}
       </button>
 
       {message && <p className="text-sm font-semibold text-mint-text">{message}</p>}

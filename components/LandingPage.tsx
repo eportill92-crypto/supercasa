@@ -9,65 +9,32 @@ export default function LandingPage() {
     // máximo más generoso para pantallas grandes. El -mt-6 cancela el py-6 que <main> le pone
     // arriba (si no, queda una franja crema entre el header y el verde del hero).
     <div className="relative left-1/2 right-1/2 -mx-[50vw] -mt-6 w-screen">
-      {/* Hero — fondo propio (degradado verde bosque de marca + resplandores difuminados) que
-          se sale del ancho del contenido para distinguirse como su propio bloque. Estilo
-          inspirado en la referencia de marca del usuario: tipografía sans en negritas (no
-          serif editorial), verde oscuro, foto de producto real en vez de screenshot grande. */}
-      <section className="relative overflow-hidden bg-[linear-gradient(160deg,#1f4d38_0%,#153626_55%,#0d2419_100%)] px-6 py-6 sm:px-10 lg:px-16 lg:py-8">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -top-32 -right-32 h-[36rem] w-[36rem] rounded-full bg-mint opacity-20 blur-[110px]"
+      {/* Hero — imagen única (la que mandó el usuario, tal cual) en vez de recrearla con
+          texto/botones HTML: después de varias rondas intentando igualarla pixel por pixel con
+          una maquetación propia (nunca calzaba exacto por ser otra tipografía/herramienta), el
+          usuario prefirió esto. "Crear cuenta gratis" y "Ver cómo funciona" siguen funcionando
+          via enlaces invisibles superpuestos en la posición de esos botones dentro de la imagen. */}
+      <section className="relative overflow-hidden">
+        <Image
+          src="/landing-hero-mockup.png"
+          alt="Tu casa, organizada y sin esfuerzo. Planea, compra y recibe tu súper, todo en un solo lugar. Productos de calidad, recetas y una casa más en orden. Bolsa de tela de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina."
+          width={1260}
+          height={580}
+          className="h-auto w-full"
+          priority
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -bottom-40 left-[-10%] h-[28rem] w-[28rem] rounded-full bg-brand-light opacity-10 blur-[110px]"
+        <Link
+          href="/registro"
+          className="absolute"
+          style={{ left: "6.6%", top: "73.1%", width: "19.8%", height: "10.7%" }}
+          aria-label="Crear cuenta gratis"
         />
-        <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
-          <div className="flex flex-col gap-5">
-            <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-cream sm:text-5xl lg:text-6xl">
-              Tu casa,
-              <br />
-              organizada
-              <br />y{" "}
-              <span className="relative inline-block">
-                sin esfuerzo.
-                <span
-                  aria-hidden
-                  className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-mint sm:-bottom-2"
-                />
-              </span>
-            </h1>
-            <p className="max-w-md text-[15px] leading-relaxed text-cream/75">
-              Planea, compra y recibe tu súper, todo en un solo lugar. Productos de calidad,
-              recetas y una casa más en orden.
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-6">
-              <Link
-                href="/registro"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-mint-light px-7 py-3 text-sm font-bold text-brand-text shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-mint hover:text-cream"
-              >
-                Crear cuenta gratis <span aria-hidden>→</span>
-              </Link>
-              <a href="#como-funciona" className="inline-flex items-center gap-2 text-sm font-bold text-cream">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream/15">
-                  <span aria-hidden className="ml-0.5 text-xs">▶</span>
-                </span>
-                <span className="underline underline-offset-4">Ver cómo funciona</span>
-              </a>
-            </div>
-          </div>
-
-          <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)] lg:h-full lg:max-w-none">
-            <Image
-              src="/landing-hero-bag-v3.png"
-              alt="Bolsa de tela de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
-              width={506}
-              height={500}
-              className="h-auto w-full lg:h-full lg:w-full lg:object-cover"
-              priority
-            />
-          </div>
-        </div>
+        <a
+          href="#como-funciona"
+          className="absolute"
+          style={{ left: "27.8%", top: "73.1%", width: "17.4%", height: "10.7%" }}
+          aria-label="Ver cómo funciona"
+        />
       </section>
 
       <div className="relative mx-auto flex max-w-[1400px] flex-col gap-16 px-6 py-12 sm:px-10 lg:px-16">

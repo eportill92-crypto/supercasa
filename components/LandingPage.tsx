@@ -44,7 +44,7 @@ export default function LandingPage() {
             <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
                 href="/registro"
-                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-mint px-7 py-3 text-sm font-bold text-brand-text shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-mint-dark hover:text-cream"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-mint-light px-7 py-3 text-sm font-bold text-brand-text shadow-[0_1px_2px_rgba(0,0,0,0.15),0_8px_24px_-8px_rgba(0,0,0,0.5)] transition hover:-translate-y-0.5 hover:bg-mint hover:text-cream"
               >
                 Crear cuenta gratis <span aria-hidden>→</span>
               </Link>

@@ -24,15 +24,13 @@ export default function LandingPage() {
         />
         <div className="relative mx-auto grid max-w-[1400px] items-center gap-10 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
           <div className="flex flex-col gap-5">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-mint">
-              Para tu casa
-            </span>
             <h1 className="text-4xl leading-[1.05] font-extrabold tracking-tight text-cream sm:text-5xl lg:text-6xl">
-              Tu súper, tu semana
+              Tu casa,
               <br />
-              y tus recetas,{" "}
+              organizada
+              <br />y{" "}
               <span className="relative inline-block">
-                organizados solos.
+                sin esfuerzo.
                 <span
                   aria-hidden
                   className="absolute -bottom-1 left-0 h-[6px] w-full rounded-full bg-mint sm:-bottom-2"
@@ -40,8 +38,8 @@ export default function LandingPage() {
               </span>
             </h1>
             <p className="max-w-md text-[15px] leading-relaxed text-cream/75">
-              SuperCasa te ayuda a planear qué van a comer, arma el pedido del súper por ti y
-              guarda tus recetas de siempre — todo en un solo lugar.
+              Planea, compra y recibe tu súper, todo en un solo lugar. Productos de calidad,
+              recetas y una casa más en orden.
             </p>
             <div className="mt-2 flex flex-wrap items-center gap-6">
               <Link
@@ -50,30 +48,24 @@ export default function LandingPage() {
               >
                 Crear cuenta gratis <span aria-hidden>→</span>
               </Link>
-              <Link
-                href="/login"
-                className="text-sm font-bold uppercase tracking-wide text-cream underline underline-offset-4"
-              >
-                Ya tengo cuenta
-              </Link>
+              <a href="#como-funciona" className="inline-flex items-center gap-2 text-sm font-bold text-cream">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-cream/15">
+                  <span aria-hidden className="ml-0.5 text-xs">▶</span>
+                </span>
+                <span className="underline underline-offset-4">Ver cómo funciona</span>
+              </a>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-xs lg:max-w-sm">
-            <div
-              aria-hidden
-              className="absolute -right-4 -bottom-4 h-full w-full rounded-2xl bg-mint sm:-right-6 sm:-bottom-6"
+          <div className="relative mx-auto w-full max-w-sm overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)] lg:h-full lg:max-w-none">
+            <Image
+              src="/landing-hero-bag.png"
+              alt="Bolsa de papel de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
+              width={400}
+              height={480}
+              className="h-auto w-full lg:h-full lg:w-full lg:object-cover"
+              priority
             />
-            <div className="relative overflow-hidden rounded-2xl shadow-[0_1px_2px_rgba(0,0,0,0.2),0_30px_70px_-20px_rgba(0,0,0,0.55)]">
-              <Image
-                src="/landing-hero-bag.png"
-                alt="Bolsa de papel de SuperCasa llena de verduras, jitomates y pan, sobre una barra de cocina"
-                width={400}
-                height={480}
-                className="h-auto w-full"
-                priority
-              />
-            </div>
           </div>
         </div>
       </section>
@@ -99,7 +91,7 @@ export default function LandingPage() {
         </section>
 
         {/* Cómo funciona — 3 pasos numerados, estilo de la referencia. */}
-        <section>
+        <section id="como-funciona">
           <span className="text-xs font-bold uppercase tracking-[0.25em] text-mint-dark">
             Cómo funciona
           </span>
